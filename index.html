@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAV AI</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #0a0a0f;
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background: #1a1a2e;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid #00d4ff33;
+        }
+        .logo {
+            width: 45px; height: 45px;
+            background: linear-gradient(135deg, #00d4ff, #0066ff);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px;
+        }
+        .header-info h1 { color: #00d4ff; font-size: 20px; }
+        .header-info p { color: #888; font-size: 12px; }
+        .status {
+            margin-left: auto;
+            display: flex; align-items: center; gap: 6px;
+            font-size: 12px; color: #00ff88;
+        }
+        .status-dot {
+            width: 8px; height: 8px;
+            background: #00ff88; border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .chat {
+            flex: 1; overflow-y: auto;
+            padding: 20px;
+            display: flex; flex-direction: column; gap: 15px;
+        }
+        .chat::-webkit-scrollbar { width: 4px; }
+        .chat::-webkit-scrollbar-thumb { background: #00d4ff33; border-radius: 2px; }
+        .xabar-group { display: flex; flex-direction: column; gap: 4px; }
+        .xabar-group.foydalanuvchi { align-items: flex-end; }
+        .xabar-group.ai { align-items: flex-start; }
+        .xabar-nom { font-size: 11px; color: #888; padding: 0 12px; }
+        .xabar {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .foydalanuvchi .xabar {
+            background: linear-gradient(135deg, #0066ff, #0044cc);
+            border-bottom-right-radius: 4px;
+        }
+        .ai .xabar {
+            background: #1a1a2e;
+            border: 1px solid #00d4ff22;
+            border-bottom-left-radius: 4px;
+        }
+        .vaqt { font-size: 10px; color: #555; padding: 0 12px; }
+        .tezkor {
+            padding: 10px 20px 0;
+            display: flex; gap: 8px; flex-wrap: wrap;
+        }
+        .tezkor button {
+            background: #1a1a2e;
+            border: 1px solid #00d4ff33;
+            color: #00d4ff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tezkor button:hover { background: #00d4ff22; }
+        .kirish-qism {
+            background: #1a1a2e;
+            padding: 15px 20px;
+            display: flex; gap: 10px; align-items: center;
+            border-top: 1px solid #00d4ff22;
+        }
+        .kirish-qism input {
+            flex: 1;
+            background: #0f0f1a;
+            border: 1px solid #00d4ff33;
+            color: white;
+            padding: 13px 20px;
+            border-radius: 25px;
+            font-size: 14px; outline: none;
+            transition: border-color 0.3s;
+        }
+        .kirish-qism input:focus { border-color: #00d4ff; }
+        .kirish-qism input::placeholder { color: #555; }
+        .yuborish-btn {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, #00d4ff, #0066ff);
+            border: none; border-radius: 50%;
+            cursor: pointer; font-size: 20px;
+            transition: transform 0.2s;
+        }
+        .yuborish-btn:hover { transform: scale(1.1); }
+        .yuborish-btn:active { transform: scale(0.95); }
+        .yuklash-dots span {
+            animation: dots 1.4s infinite;
+            font-size: 20px; color: #00d4ff;
+        }
+        .yuklash-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .yuklash-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes dots {
+            0%, 80%, 100% { opacity: 0.2; }
+            40% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🤖</div>
+        <div class="header-info">
+            <h1>RAV AI</h1>
+            <p>Shaxsiy AI Yordamchi</p>
+        </div>
+        <div class="status">
+            <div class="status-dot"></div>
+            <span>Online</span>
+        </div>
+    </div>
+
+    <div class="chat" id="chat">
+        <div class="xabar-group ai">
+            <div class="xabar-nom">🤖 RAV AI</div>
+            <div class="xabar">
+                Salom! Men RAV AI — sizning aqlli yordamchingizman. 👋
+                Har qanday savolingizni yozing — O'zbek, Rus yoki Ingliz tilida!
+            </div>
+            <div class="vaqt" id="boshlangich-vaqt"></div>
+        </div>
+    </div>
+
+    <div class="tezkor">
+        <button onclick="tezkor('Salom!')">👋 Salom</button>
+        <button onclick="tezkor('Menga motivatsiya ber')">💪 Motivatsiya</button>
+        <button onclick="tezkor('Qiziqarli fakt ayt')">🧠 Fakt</button>
+        <button onclick="tezkor('Menga she\'r yoz')">📝 She\'r</button>
+        <button onclick="tezkor('Python nima?')">🐍 Python</button>
+    </div>
+
+    <div class="kirish-qism">
+        <input type="text" id="savol" placeholder="Savolingizni yozing..." />
+        <button class="yuborish-btn" onclick="yuborish()">➤</button>
+    </div>
+
+    <script>
+        document.getElementById('boshlangich-vaqt').textContent = hozirgiVaqt();
+
+        document.getElementById('savol').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') yuborish();
+        });
+
+        function hozirgiVaqt() {
+            const now = new Date();
+            return now.getHours().toString().padStart(2,'0') + ':' +
+                   now.getMinutes().toString().padStart(2,'0');
+        }
+
+        function tezkor(matn) {
+            document.getElementById('savol').value = matn;
+            yuborish();
+        }
+
+        async function yuborish() {
+            const matn = document.getElementById('savol').value.trim();
+            if (!matn) return;
+
+            qoshXabar('foydalanuvchi', 'Siz', matn);
+            document.getElementById('savol').value = '';
+
+            const yuklashDiv = qoshXabar('ai', '🤖 RAV AI',
+                '<div class="yuklash-dots"><span>●</span><span>●</span><span>●</span></div>'
+            );
+
+            try {
+                const res = await fetch('/savol', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({matn: matn})
+                });
+                const data = await res.json();
+                yuklashDiv.querySelector('.xabar').innerHTML = data.javob;
+            } catch(e) {
+                yuklashDiv.querySelector('.xabar').innerHTML = 'Xato yuz berdi!';
+            }
+            document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+        }
+
+        function qoshXabar(tur, nom, matn) {
+            const chat = document.getElementById('chat');
+            const group = document.createElement('div');
+            group.className = 'xabar-group ' + tur;
+
+            const nomDiv = document.createElement('div');
+            nomDiv.className = 'xabar-nom';
+            nomDiv.textContent = nom;
+
+            const xabarDiv = document.createElement('div');
+            xabarDiv.className = 'xabar';
+            xabarDiv.innerHTML = matn;
+
+            const vaqtDiv = document.createElement('div');
+            vaqtDiv.className = 'vaqt';
+            vaqtDiv.textContent = hozirgiVaqt();
+
+            group.appendChild(nomDiv);
+            group.appendChild(xabarDiv);
+            group.appendChild(vaqtDiv);
+            chat.appendChild(group);
+            chat.scrollTop = chat.scrollHeight;
+            return group;
+        }
+    </script>
+</body>
+</html>
