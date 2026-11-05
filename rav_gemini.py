@@ -1,7 +1,9 @@
-import time
+import os
+from dotenv import load_dotenv
 from google import genai
 
-API_KEY = "AQ.Ab8RN6JeuRGx847ue-YoZ8qdxhMkHUjnnPVRtT7V3tnUrHqmrA"
+load_dotenv()
+API_KEY = os.environ.get("API_KEY")
 
 client = genai.Client(api_key=API_KEY)
 
@@ -31,8 +33,7 @@ while True:
             break
         except Exception as e:
             if urinish < 2:
-                print(f"⏳ Server band, {5} soniya kutilmoqda...")
-                time.sleep(5)
+                print(f"⏳ Server band, {5} soniya kutilmoqda...")time.sleep(5)
             else:
                 print("⚠️ Server hozir band. Keyinroq urinib ko'ring!")
                 

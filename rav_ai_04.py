@@ -3,8 +3,10 @@ import os
 import time
 import datetime
 from google import genai
+from dotenv import load_dotenv
 
-API_KEY = "AQ.Ab8RN6JeuRGx847ue-YoZ8qdxhMkHUjnnPVRtT7V3tnUrHqmrA"
+load_dotenv()
+API_KEY = os.environ.get("API_KEY")
 XOTRA_FAYILI = os.path.join(os.path.dirname(os.path.abspath(__file__)), "rav_xotira.json")
 client = genai.Client(api_key=API_KEY)
 
