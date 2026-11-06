@@ -1,11 +1,15 @@
 import time
 import datetime
+import base64
+import os
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from google import genai
+from dotenv import load_dotenv
 
-API_KEY = "AQ.Ab8RN6JeuRGx847ue-YoZ8qdxhMkHUjnnPVRtT7V3tnUrHqmrA"
+load_dotenv()
+API_KEY = os.environ.get("API_KEY", "AQ.Ab8RN6ImsTfv0vDYHmnXwJmKSrKoNb6TFi__mCm6himMUZKjRg")
 client = genai.Client(api_key=API_KEY)
 
 app = FastAPI()
@@ -29,6 +33,9 @@ def gemini_javob(savol):
 class SavolModel(BaseModel):
     matn: str
 
+class RasmModel(BaseModel):
+    matn: str
+
 @app.get("/", response_class=HTMLResponse)
 def bosh_sahifa():
     with open("index.html", "r", encoding="utf-8") as f:
@@ -38,3 +45,13 @@ def bosh_sahifa():
 def savol_yuborish(data: SavolModel):
     javob = gemini_javob(data.matn)
     return {"javob": javob}
+
+import httpx
+
+@app.post("/rasm")
+def rasm_yaratish(data: RasmModel):
+    try:
+        url = "https://image.pollinations.ai/prompt/" + data.matn.replace(" ", "%20")
+        return {"rasm_url": url}
+    except Exception as e:
+        return {"xato": str(e)}

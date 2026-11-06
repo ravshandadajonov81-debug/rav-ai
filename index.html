@@ -156,6 +156,7 @@
         <button onclick="tezkor('Qiziqarli fakt ayt')">🧠 Fakt</button>
         <button onclick="tezkor('Menga she\'r yoz')">📝 She\'r</button>
         <button onclick="tezkor('Python nima?')">🐍 Python</button>
+        <button onclick="rasmSorash()">🎨 Rasm</button>
     </div>
 
     <div class="kirish-qism">
@@ -230,6 +231,39 @@
             chat.scrollTop = chat.scrollHeight;
             return group;
         }
+async function rasmSorash() {
+    const matn = document.getElementById('savol').value.trim();
+    if (!matn) {
+        document.getElementById('savol').placeholder = "Rasm tavsifini yozing...";
+        document.getElementById('savol').focus();
+        return;
+    }
+
+    qoshXabar('foydalanuvchi', 'Siz', "🎨 Rasm so'rovi: " + matn);
+    document.getElementById('savol').value = '';
+
+    const yuklashDiv = qoshXabar('ai', '🤖 RAV AI',
+        '<div class="yuklash-dots"><span>●</span><span>●</span><span>●</span></div>'
+    );
+
+    try {
+        const res = await fetch('/rasm', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({matn: matn})
+        });
+        const data = await res.json();
+        if (data.rasm_url) {
+            yuklashDiv.querySelector('.xabar').innerHTML =
+                '<img src="' + data.rasm_url + '" style="max-width:100%; border-radius:10px;">';
+        } else {
+            yuklashDiv.querySelector('.xabar').innerHTML = "Xato: " + (data.xato || "Noma\'lum xato");
+        }
+    } catch(e) {
+        yuklashDiv.querySelector('.xabar').innerHTML = 'Xato yuz berdi!';
+    }
+}
+
     </script>
 </body>
 </html>
