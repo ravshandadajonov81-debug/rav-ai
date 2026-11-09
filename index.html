@@ -114,6 +114,20 @@
         }
         .yuborish-btn:hover { transform: scale(1.1); }
         .yuborish-btn:active { transform: scale(0.95); }
+        .mikrofon-btn {
+            width: 48px; height: 48px;
+            background: #1a1a2e;
+            border: 1px solid #00d4ff33;
+            border-radius: 50%;
+            cursor: pointer; font-size: 20px;
+            transition: all 0.2s;
+        }
+        .mikrofon-btn:hover { background: #00d4ff22; }
+        .mikrofon-btn.tinglayapti {
+            background: #ff444422;
+            border-color: #ff4444;
+            animation: pulse 1s infinite;
+        }
         .yuklash-dots span {
             animation: dots 1.4s infinite;
             font-size: 20px; color: #00d4ff;
@@ -144,7 +158,7 @@
             <div class="xabar-nom">🤖 RAV AI</div>
             <div class="xabar">
                 Salom! Men RAV AI — sizning aqlli yordamchingizman. 👋
-                Har qanday savolingizni yozing — O'zbek, Rus yoki Ingliz tilida!
+                Har qanday savolingizni yozing yoki 🎤 tugmasini bosib gapiring!
             </div>
             <div class="vaqt" id="boshlangich-vaqt"></div>
         </div>
@@ -160,6 +174,7 @@
     </div>
 
     <div class="kirish-qism">
+        <button class="mikrofon-btn" onclick="ovozniTinglash()" id="mikrofon">🎤</button>
         <input type="text" id="savol" placeholder="Savolingizni yozing..." />
         <button class="yuborish-btn" onclick="yuborish()">➤</button>
     </div>
@@ -201,10 +216,89 @@
                 });
                 const data = await res.json();
                 yuklashDiv.querySelector('.xabar').innerHTML = data.javob;
+                ovozOqish(data.javob);
             } catch(e) {
                 yuklashDiv.querySelector('.xabar').innerHTML = 'Xato yuz berdi!';
             }
             document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+        }
+
+        async function rasmSorash() {
+            const matn = document.getElementById('savol').value.trim();
+            if (!matn) {
+                document.getElementById('savol').placeholder = "Rasm tavsifini yozing...";
+                document.getElementById('savol').focus();
+                return;
+            }
+
+            qoshXabar('foydalanuvchi', 'Siz', "🎨 Rasm so'rovi: " + matn);
+            document.getElementById('savol').value = '';
+
+            const yuklashDiv = qoshXabar('ai', '🤖 RAV AI',
+                '<div class="yuklash-dots"><span>●</span><span>●</span><span>●</span></div>'
+            );
+
+            try {
+                const res = await fetch('/rasm', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({matn: matn})
+                });
+                const data = await res.json();
+                if (data.rasm_url) {
+                    yuklashDiv.querySelector('.xabar').innerHTML =
+                        '<img src="' + data.rasm_url + '" style="max-width:100%; border-radius:10px;">';
+                } else {
+                    yuklashDiv.querySelector('.xabar').innerHTML = "Xato: " + (data.xato || "Noma\'lum xato");
+                }
+            } catch(e) {
+                yuklashDiv.querySelector('.xabar').innerHTML = 'Xato yuz berdi!';
+            }
+        }
+
+        function ovozniTinglash() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert("Brauzeringiz ovozni qo'llab-quvvatlamaydi!");
+                return;
+            }
+
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'uz-UZ';
+            recognition.interimResults = false;
+
+            const btn = document.getElementById('mikrofon');
+            btn.classList.add('tinglayapti');
+            btn.textContent = '⏹';
+
+            recognition.start();
+
+            recognition.onresult = function(event) {
+                const matn = event.results[0][0].transcript;
+                document.getElementById('savol').value = matn;
+                btn.classList.remove('tinglayapti');
+                btn.textContent = '🎤';
+                yuborish();
+            };
+
+            recognition.onerror = function() {
+                btn.classList.remove('tinglayapti');
+                btn.textContent = '🎤';
+            };
+
+            recognition.onend = function() {
+                btn.classList.remove('tinglayapti');
+                btn.textContent = '🎤';
+            };
+        }
+
+        function ovozOqish(matn) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(matn);
+                utterance.lang = 'ru-RU';
+                utterance.rate = 1;
+                utterance.pitch = 1;
+                window.speechSynthesis.speak(utterance);
+            }
         }
 
         function qoshXabar(tur, nom, matn) {
@@ -231,39 +325,6 @@
             chat.scrollTop = chat.scrollHeight;
             return group;
         }
-async function rasmSorash() {
-    const matn = document.getElementById('savol').value.trim();
-    if (!matn) {
-        document.getElementById('savol').placeholder = "Rasm tavsifini yozing...";
-        document.getElementById('savol').focus();
-        return;
-    }
-
-    qoshXabar('foydalanuvchi', 'Siz', "🎨 Rasm so'rovi: " + matn);
-    document.getElementById('savol').value = '';
-
-    const yuklashDiv = qoshXabar('ai', '🤖 RAV AI',
-        '<div class="yuklash-dots"><span>●</span><span>●</span><span>●</span></div>'
-    );
-
-    try {
-        const res = await fetch('/rasm', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({matn: matn})
-        });
-        const data = await res.json();
-        if (data.rasm_url) {
-            yuklashDiv.querySelector('.xabar').innerHTML =
-                '<img src="' + data.rasm_url + '" style="max-width:100%; border-radius:10px;">';
-        } else {
-            yuklashDiv.querySelector('.xabar').innerHTML = "Xato: " + (data.xato || "Noma\'lum xato");
-        }
-    } catch(e) {
-        yuklashDiv.querySelector('.xabar').innerHTML = 'Xato yuz berdi!';
-    }
-}
-
     </script>
 </body>
 </html>
