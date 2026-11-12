@@ -10,7 +10,14 @@ from dotenv import load_dotenv
 load_dotenv()
 
 API_KEY = os.environ.get("GROQ_API_KEY", "")
-http_client = httpx.Client(verify=False)
+
+# Render va local uchun SSL sozlash
+IS_RENDER = os.environ.get("RENDER", False)
+if IS_RENDER:
+    http_client = httpx.Client()
+else:
+    http_client = httpx.Client(verify=False)
+
 client = Groq(api_key=API_KEY, http_client=http_client)
 app = FastAPI()
 
