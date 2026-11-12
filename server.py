@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-API_KEY = os.environ.get("GROQ_API_KEY", "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")
+API_KEY = os.environ.get("GROQ_API_KEY", "")
 
 http_client = httpx.Client(verify=False)
 client = Groq(api_key=API_KEY, http_client=http_client)
