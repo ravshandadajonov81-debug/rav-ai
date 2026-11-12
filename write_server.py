@@ -1,6 +1,7 @@
 content = open('server.py', 'w', encoding='utf-8')
 content.write("""import os
 import time
+import threading
 import httpx
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
@@ -11,8 +12,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 API_KEY = os.environ.get("GROQ_API_KEY", "")
-
-# Render va local uchun SSL sozlash
 IS_RENDER = os.environ.get("RENDER", False)
 if IS_RENDER:
     http_client = httpx.Client()
@@ -23,6 +22,18 @@ client = Groq(api_key=API_KEY, http_client=http_client)
 app = FastAPI()
 
 suhbat_tarixi = []
+
+# Keep Alive - server uyquga ketmasin
+def keep_alive():
+    while True:
+        time.sleep(600)
+        try:
+            http_client.get("https://rav-ai.onrender.com", timeout=10)
+            print("Keep alive: server jonli!")
+        except Exception:
+            pass
+
+threading.Thread(target=keep_alive, daemon=True).start()
 
 def shahar_topish(savol):
     savol_lower = savol.lower()
