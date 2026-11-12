@@ -1,34 +1,45 @@
-import time
-import datetime
-import base64
 import os
+import time
+import httpx
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from google import genai
+from groq import Groq
 from dotenv import load_dotenv
 
 load_dotenv()
-API_KEY = os.environ.get("API_KEY", "AQ.Ab8RN6ImsTfv0vDYHmnXwJmKSrKoNb6TFi__mCm6himMUZKjRg")
-client = genai.Client(api_key=API_KEY)
 
+API_KEY = os.environ.get("GROQ_API_KEY", "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")
+
+http_client = httpx.Client(verify=False)
+client = Groq(api_key=API_KEY, http_client=http_client)
 app = FastAPI()
 
+suhbat_tarixi = []
+
 def gemini_javob(savol):
-    kontekst = "Sen RAV AI degan aqlli shaxsiy assistantsan. O'zbek, Rus, Ingliz tillarida javob bera olasan. Foydalanuvchi qaysi tilda yozsa, o'sha tilda javob ber."
-    matn = kontekst + " Savol: " + savol
+    global suhbat_tarixi
+    suhbat_tarixi.append({"role": "user", "content": savol})
+    if len(suhbat_tarixi) > 20:
+        suhbat_tarixi = suhbat_tarixi[-20:]
+    messages = [
+        {"role": "system", "content": "Sen RAV AI degan eng aqlli shaxsiy assistantsan. Foydalanuvchi qaysi tilda yozsa, osha tilda javob ber. Suhbat tarixini eslab qol. Foydalanuvchi ismini aytsa eslab qol."}
+    ] + suhbat_tarixi
     for urinish in range(3):
         try:
-            response = client.models.generate_content(
-                model="gemini-flash-lite-latest",
-                contents=matn,
+            response = client.chat.completions.create(
+                model="openai/gpt-oss-120b",
+                messages=messages,
+                max_tokens=1024,
             )
-            return response.text
+            javob = response.choices[0].message.content
+            suhbat_tarixi.append({"role": "assistant", "content": javob})
+            return javob
         except Exception:
             if urinish < 2:
-                time.sleep(5)
+                time.sleep(2)
             else:
-                return "Server band. Keyinroq urinib koring!"
+                return "Hozir server band. Biroz kutib qayta yuboring!"
 
 class SavolModel(BaseModel):
     matn: str
@@ -45,8 +56,6 @@ def bosh_sahifa():
 def savol_yuborish(data: SavolModel):
     javob = gemini_javob(data.matn)
     return {"javob": javob}
-
-import httpx
 
 @app.post("/rasm")
 def rasm_yaratish(data: RasmModel):
