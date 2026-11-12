@@ -22,7 +22,6 @@ app = FastAPI()
 
 suhbat_tarixi = []
 
-# Keep Alive - server uyquga ketmasin
 def keep_alive():
     while True:
         time.sleep(600)
@@ -57,7 +56,6 @@ def shahar_topish(savol):
         "meksika": "Mexico+City", "mexico": "Mexico+City",
         "argentina": "Buenos+Aires",
         "pokiston": "Karachi", "pakistan": "Karachi",
-        "bangladesh": "Dhaka",
         "tailand": "Bangkok", "thailand": "Bangkok",
         "vyetnam": "Hanoi", "vietnam": "Hanoi",
         "indoneziya": "Jakarta", "indonesia": "Jakarta",
@@ -90,12 +88,9 @@ def shahar_topish(savol):
         "turkmaniston": "Ashgabat", "turkmenistan": "Ashgabat",
         "afgoniston": "Kabul", "afghanistan": "Kabul",
         "singapur": "Singapore", "singapore": "Singapore",
-        "gonkong": "Hong+Kong", "hong kong": "Hong+Kong",
-        "yangi zelandiya": "Auckland", "new zealand": "Auckland",
-        "keniya": "Nairobi", "kenya": "Nairobi",
         "marokash": "Casablanca", "morocco": "Casablanca",
+        "keniya": "Nairobi", "kenya": "Nairobi",
         "kolumbiya": "Bogota", "colombia": "Bogota",
-        "venesuela": "Caracas", "venezuela": "Caracas",
         "peru": "Lima", "chili": "Santiago", "chile": "Santiago",
         "kuba": "Havana", "cuba": "Havana",
     }
@@ -171,6 +166,18 @@ def gemini_javob(savol):
             else:
                 return "Hozir server band. Biroz kutib qayta yuboring!"
 
+def rasm_prompt_tayyorla(matn):
+    try:
+        response = client.chat.completions.create(
+            model="openai/gpt-oss-120b",
+            messages=[{"role": "user", "content": f"Convert this to a detailed English image prompt for AI image generation (max 15 words, no quotes): {matn}"}],
+            max_tokens=40,
+        )
+        prompt = response.choices[0].message.content.strip().strip('"').strip("'")
+        return prompt
+    except Exception:
+        return matn
+
 class SavolModel(BaseModel):
     matn: str
 
@@ -190,7 +197,9 @@ def savol_yuborish(data: SavolModel):
 @app.post("/rasm")
 def rasm_yaratish(data: RasmModel):
     try:
-        url = "https://image.pollinations.ai/prompt/" + data.matn.replace(" ", "%20")
+        prompt = rasm_prompt_tayyorla(data.matn)
+        prompt_full = prompt + ", ultra realistic, 4K, professional photography, detailed"
+        url = "https://image.pollinations.ai/prompt/" + prompt_full.replace(" ", "%20") + "?model=flux&width=1024&height=1024&nologo=true"
         return {"rasm_url": url}
     except Exception as e:
         return {"xato": str(e)}
