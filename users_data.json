@@ -1,0 +1,25 @@
+{
+  "default": {
+    "ism": "ravshan",
+    "til": "uz",
+    "suhbat": [
+      {
+        "role": "user",
+        "content": "Mening ismim ravshan"
+      },
+      {
+        "role": "assistant",
+        "content": "Salom, Ravshan! Bugun qanday yordam kerak?"
+      },
+      {
+        "role": "user",
+        "content": "Mening ismim nima?"
+      },
+      {
+        "role": "assistant",
+        "content": "Sizning ismingiz — Ravshan."
+      }
+    ],
+    "qiziqishlar": []
+  }
+}

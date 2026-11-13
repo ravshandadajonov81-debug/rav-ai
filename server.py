@@ -1,5 +1,6 @@
 import os
 import time
+import json
 import threading
 import httpx
 from fastapi import FastAPI
@@ -22,9 +23,37 @@ else:
 client = Groq(api_key=API_KEY, http_client=http_client)
 app = FastAPI()
 
-suhbat_tarixi = []
-telegram_suhbatlar = {}
+USERS_FILE = "users_data.json"
+
+def users_yuklash():
+    if os.path.exists(USERS_FILE):
+        with open(USERS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+def users_saqlash(data):
+    with open(USERS_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+def foydalanuvchi_olish(session_id):
+    users = users_yuklash()
+    if session_id not in users:
+        users[session_id] = {
+            "ism": "",
+            "til": "uz",
+            "suhbat": [],
+            "qiziqishlar": []
+        }
+        users_saqlash(users)
+    return users[session_id]
+
+def foydalanuvchi_yangilash(session_id, data):
+    users = users_yuklash()
+    users[session_id] = data
+    users_saqlash(users)
+
 bot_boshlandi = False
+telegram_suhbatlar = {}
 
 def keep_alive():
     while True:
@@ -48,19 +77,13 @@ def telegram_bot():
         return
     bot_boshlandi = True
     print("Telegram bot ishga tushdi!")
-
-    # Eski xabarlarni o'tkazib yuborish
     try:
         url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/getUpdates"
         r = http_client.get(url, params={"timeout": 1}, timeout=5)
         updates = r.json().get("result", [])
-        if updates:
-            offset = updates[-1]["update_id"] + 1
-        else:
-            offset = None
+        offset = updates[-1]["update_id"] + 1 if updates else None
     except Exception:
         offset = None
-
     while True:
         try:
             url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/getUpdates"
@@ -68,22 +91,24 @@ def telegram_bot():
             if offset:
                 params["offset"] = offset
             r = http_client.get(url, params=params, timeout=15)
-            yangiliklar = r.json()
-            for update in yangiliklar.get("result", []):
+            for update in r.json().get("result", []):
                 offset = update["update_id"] + 1
                 message = update.get("message", {})
                 chat_id = message.get("chat", {}).get("id")
                 matn = message.get("text", "")
                 if chat_id and matn:
+                    session_id = f"telegram_{chat_id}"
+                    user = foydalanuvchi_olish(session_id)
                     if matn == "/start":
-                        telegram_yuborish(chat_id, "Salom! Men RAV AI — aqlli yordamchingizman! Har qanday savolingizni yozing!")
+                        telegram_yuborish(chat_id, "Salom! Men RAV AI — aqlli yordamchingizman!\nIsmingizni ayting, eslab qolaman!")
                     else:
-                        if chat_id not in telegram_suhbatlar:
-                            telegram_suhbatlar[chat_id] = []
-                        telegram_suhbatlar[chat_id].append({"role": "user", "content": matn})
-                        if len(telegram_suhbatlar[chat_id]) > 20:
-                            telegram_suhbatlar[chat_id] = telegram_suhbatlar[chat_id][-20:]
-                        messages = [{"role": "system", "content": "Sen RAV AI degan eng aqlli assistantsan. Foydalanuvchi qaysi tilda yozsa, osha tilda javob ber. Ismini eslab qol."}] + telegram_suhbatlar[chat_id]
+                        user["suhbat"].append({"role": "user", "content": matn})
+                        if len(user["suhbat"]) > 20:
+                            user["suhbat"] = user["suhbat"][-20:]
+                        system = "Sen RAV AI degan eng aqlli assistantsan. Foydalanuvchi qaysi tilda yozsa, osha tilda javob ber. Ismini aytsa eslab qol va keyingi suhbatlarda ismi bilan murojaat qil."
+                        if user["ism"]:
+                            system += f" Foydalanuvchi ismi: {user['ism']}."
+                        messages = [{"role": "system", "content": system}] + user["suhbat"]
                         try:
                             response = client.chat.completions.create(
                                 model="openai/gpt-oss-120b",
@@ -91,7 +116,14 @@ def telegram_bot():
                                 max_tokens=1024,
                             )
                             javob = response.choices[0].message.content
-                            telegram_suhbatlar[chat_id].append({"role": "assistant", "content": javob})
+                            user["suhbat"].append({"role": "assistant", "content": javob})
+                            if not user["ism"] and ("ismim" in matn.lower() or "mening ismim" in matn.lower()):
+                                words = matn.split()
+                                for i, w in enumerate(words):
+                                    if w.lower() in ["ismim", "ismim:", "ismi"]:
+                                        if i + 1 < len(words):
+                                            user["ism"] = words[i + 1].strip(".,!")
+                            foydalanuvchi_yangilash(session_id, user)
                             telegram_yuborish(chat_id, javob)
                         except Exception:
                             telegram_yuborish(chat_id, "Hozir band. Qayta urinib koring!")
@@ -107,12 +139,11 @@ def shahar_topish(savol):
     mamlakatlar = {
         "fransiya": "Paris", "france": "Paris",
         "rossiya": "Moscow", "russia": "Moscow",
-        "angliya": "London", "england": "London", "uk": "London",
+        "angliya": "London", "england": "London",
         "germaniya": "Berlin", "germany": "Berlin",
         "xitoy": "Beijing", "china": "Beijing",
         "yaponiya": "Tokyo", "japan": "Tokyo",
         "amerika": "New+York", "usa": "New+York",
-        "koreys": "Seoul", "korea": "Seoul",
         "hindiston": "Delhi", "india": "Delhi",
         "italiya": "Rome", "italy": "Rome",
         "turkiya": "Istanbul", "turkey": "Istanbul",
@@ -122,29 +153,21 @@ def shahar_topish(savol):
         "braziliya": "Sao+Paulo", "brazil": "Sao+Paulo",
         "avstraliya": "Sydney", "australia": "Sydney",
         "kanada": "Toronto", "canada": "Toronto",
-        "meksika": "Mexico+City", "mexico": "Mexico+City",
-        "argentina": "Buenos+Aires",
         "pokiston": "Karachi", "pakistan": "Karachi",
         "tailand": "Bangkok", "thailand": "Bangkok",
-        "indoneziya": "Jakarta", "indonesia": "Jakarta",
-        "malayziya": "Kuala+Lumpur", "malaysia": "Kuala+Lumpur",
         "saudiya": "Riyadh", "saudi": "Riyadh",
-        "qatar": "Doha", "doha": "Doha",
         "bae": "Dubai", "uae": "Dubai",
         "ispaniya": "Madrid", "spain": "Madrid",
-        "niderlandiya": "Amsterdam", "netherlands": "Amsterdam",
         "ukraina": "Kyiv", "ukraine": "Kyiv",
         "ozarbayjon": "Baku", "azerbaijan": "Baku",
         "qirgiziston": "Bishkek", "kyrgyzstan": "Bishkek",
         "tojikiston": "Dushanbe", "tajikistan": "Dushanbe",
         "turkmaniston": "Ashgabat", "turkmenistan": "Ashgabat",
         "afgoniston": "Kabul", "afghanistan": "Kabul",
-        "singapur": "Singapore", "singapore": "Singapore",
         "marokash": "Casablanca", "morocco": "Casablanca",
         "keniya": "Nairobi", "kenya": "Nairobi",
         "kolumbiya": "Bogota", "colombia": "Bogota",
         "peru": "Lima", "chili": "Santiago", "chile": "Santiago",
-        "kuba": "Havana", "cuba": "Havana",
     }
     for kalit, shahar in mamlakatlar.items():
         if kalit in savol_lower:
@@ -182,18 +205,20 @@ def kerak_mi_internet(savol):
             return True
     return False
 
-def gemini_javob(savol):
-    global suhbat_tarixi
+def gemini_javob(savol, session_id="default"):
+    user = foydalanuvchi_olish(session_id)
     internet_malumot = ""
     if kerak_mi_internet(savol):
         internet_malumot = internet_qidirish(savol)
-    suhbat_tarixi.append({"role": "user", "content": savol})
-    if len(suhbat_tarixi) > 20:
-        suhbat_tarixi = suhbat_tarixi[-20:]
+    user["suhbat"].append({"role": "user", "content": savol})
+    if len(user["suhbat"]) > 20:
+        user["suhbat"] = user["suhbat"][-20:]
     system = "Sen RAV AI degan eng aqlli shaxsiy assistantsan. Foydalanuvchi qaysi tilda yozsa, osha tilda javob ber. Suhbat tarixini eslab qol. Foydalanuvchi ismini aytsa eslab qol."
+    if user["ism"]:
+        system += f" Foydalanuvchi ismi: {user['ism']}."
     if internet_malumot:
         system += "\nInternet malumotlari:\n" + internet_malumot
-    messages = [{"role": "system", "content": system}] + suhbat_tarixi
+    messages = [{"role": "system", "content": system}] + user["suhbat"]
     for urinish in range(3):
         try:
             response = client.chat.completions.create(
@@ -202,7 +227,14 @@ def gemini_javob(savol):
                 max_tokens=1024,
             )
             javob = response.choices[0].message.content
-            suhbat_tarixi.append({"role": "assistant", "content": javob})
+            user["suhbat"].append({"role": "assistant", "content": javob})
+            if not user["ism"] and "ismim" in savol.lower():
+                words = savol.split()
+                for i, w in enumerate(words):
+                    if w.lower() in ["ismim", "ismim:"]:
+                        if i + 1 < len(words):
+                            user["ism"] = words[i + 1].strip(".,!")
+            foydalanuvchi_yangilash(session_id, user)
             return javob
         except Exception:
             if urinish < 2:
@@ -223,6 +255,7 @@ def rasm_prompt_tayyorla(matn):
 
 class SavolModel(BaseModel):
     matn: str
+    session_id: str = "default"
 
 class RasmModel(BaseModel):
     matn: str
@@ -234,7 +267,7 @@ def bosh_sahifa():
 
 @app.post("/savol")
 def savol_yuborish(data: SavolModel):
-    javob = gemini_javob(data.matn)
+    javob = gemini_javob(data.matn, data.session_id)
     return {"javob": javob}
 
 @app.post("/rasm")
