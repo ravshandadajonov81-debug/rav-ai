@@ -25,6 +25,7 @@ app = FastAPI()
 
 suhbat_tarixi = []
 telegram_suhbatlar = {}
+bot_boshlandi = False
 
 def keep_alive():
     while True:
@@ -43,15 +44,31 @@ def telegram_yuborish(chat_id, matn):
         print("Telegram xato:", e)
 
 def telegram_bot():
-    offset = None
+    global bot_boshlandi
+    if bot_boshlandi:
+        return
+    bot_boshlandi = True
     print("Telegram bot ishga tushdi!")
+
+    # Eski xabarlarni o'tkazib yuborish
+    try:
+        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/getUpdates"
+        r = http_client.get(url, params={"timeout": 1}, timeout=5)
+        updates = r.json().get("result", [])
+        if updates:
+            offset = updates[-1]["update_id"] + 1
+        else:
+            offset = None
+    except Exception:
+        offset = None
+
     while True:
         try:
             url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/getUpdates"
-            params = {"timeout": 30}
+            params = {"timeout": 10, "limit": 10}
             if offset:
                 params["offset"] = offset
-            r = http_client.get(url, params=params, timeout=35)
+            r = http_client.get(url, params=params, timeout=15)
             yangiliklar = r.json()
             for update in yangiliklar.get("result", []):
                 offset = update["update_id"] + 1
