@@ -1,106 +1,51 @@
 {
-  "default": {
-    "ism": "ravshan",
+  "telegram_8693112606": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [],
+    "qiziqishlar": []
+  },
+  "test123": {
+    "ism": "",
     "til": "uz",
     "suhbat": [
-      {
-        "role": "assistant",
-        "content": "Sizning ismingiz — Ravshan."
-      },
-      {
-        "role": "user",
-        "content": "Bugun dunyo yangiliklari qanday?"
-      },
-      {
-        "role": "assistant",
-        "content": ""
-      },
-      {
-        "role": "user",
-        "content": "Bugun dunyo yangiliklari qanday?"
-      },
-      {
-        "role": "assistant",
-        "content": "Kechirasiz, Ravshan, lekin men hozirgi kunning aniq yangiliklari haqida ma'lumotga ega emasman. Yangiliklarni eng so‘nggi va ishonchli manbalardan—masalan, xalqaro yangiliklar veb‑saytlari, telekanallar yoki yangilik ilovalari—tekshirishni tavsiya qilaman. Agar boshqa biror mavzuda yoki oldingi suhbatga oid savollaringiz bo‘lsa, yordam berishga tayyorman!"
-      },
-      {
-        "role": "user",
-        "content": "Hamma ishni ravo bayot shakllanib degan so'z bilan o'zimizni r."
-      },
-      {
-        "role": "assistant",
-        "content": "Kechirasiz, Ravshan, soʻzlaringiz biroz noaniq boʻlganga o‘xlayapti. “ravo bayot shakllanib” degan iborani qanday kontekstda yoki qaysi mazmunda ishlatmoqchisiz? Buni yanada aniqroq tushunib, sizga kerakli jumla yoki matnni yaratishga yordam beraman."
-      },
       {
         "role": "user",
         "content": "salom"
       },
       {
         "role": "assistant",
-        "content": "Salom, Ravshan! ✨"
-      },
-      {
-        "role": "user",
-        "content": "Salom!"
-      },
-      {
-        "role": "assistant",
-        "content": "Va alaykum assalom, Ravshan! Qalay?"
-      },
-      {
-        "role": "user",
-        "content": "salom mening ismim Ravshan"
-      },
-      {
-        "role": "assistant",
-        "content": "Albatta, men sizning ismingizni — **Ravshan** — bilaman va eslab turaman. Seni ko'rishdan xursandman! Bugun qanday yordamingizni istaysan?"
-      },
-      {
-        "role": "user",
-        "content": "menga Toshkentni bugungi ob havosi haqida malumot ber"
-      },
-      {
-        "role": "assistant",
-        "content": "Assalomu alaykum, Ravshan!\n\nBugun Toshkentda havo harorati **+5°C**, osmonda bulutlar ko'ra ko'rinmoqda va **yroq momaqalgay (🌦️)** bo'lishi mumkin. Atrof‑muhit sharoiti salqin bo'lgani uchun, ko'chaga chiqishda issiqkiya kiyinishni unutmang va rost olib borishni tavsiya qilaman."
-      },
-      {
-        "role": "user",
-        "content": "qarshida ob-havo qanday"
-      },
-      {
-        "role": "assistant",
-        "content": "Kechirasiz, Ravshan, lekin ma'lumotlarimda hozircha Qarshi shahri uchun aniq ob-havo ma'lumotlari yo'q. Men faqat Toshkentdagi holatni (+5°C, 🌦️) bilib turibman.\n\nAniqroq ma'lumot olish uchun mahalliy ob-havo ilovalarini yoki onlayn servislarini tekshirishingizni tavsiya qilaman."
-      },
-      {
-        "role": "user",
-        "content": "qarshi tarixi haqioda malumot ber"
-      },
-      {
-        "role": "assistant",
-        "content": "Ravshan, Qarshi shahrining tarixi juda gazalariga borib taqaladi va u Oʻzbekistonning eng qadmanshaharlaridan biri hisoblanadi. Mana asosiy favtolar:\n\n### 1. **Qadimiy Nom va Eski Tarix**\n- Qarshining qadimiy nomi **“Karisena”** boʻlgan. Bu shahar miloddan avvalgi IV–III asrlarda mahsusi navoiy qadimiy Yunon manbalarida (xususan, Ptoleme mexligidagi xaritalarda) tilga olingan.\n- Shahar Zarafshon daryosining oʻng qirgʻogʻida joylashgan bo‘lib, Shayxontohur va Shaxrisabz tumanlari chegarasida joylashgan.\n\n### 2. **Amir Temur davri (Oltin Asr)**\n- Qarshi shoh qahramonimiz **Amir Temur** davrida xususiyligi bilan ajralib turishga boshlagan.\n- Temur shaharni tahaffuz qilish uchun muhim harbiy yordam qurdirgan, maktab, madrasa, karvonsaroy va masjidlar qurilgan.\n- Shahar **Oq Temur** (Amir Temurning oʻgʻli) uchun mahsus saroy shahrqa boʻlgan.\n\n### 3. **XV–XVI asrlar: Haydar Qoʻtlo va Shahrisabz bilan bogʻliqligi**\n- Qarshi bu zamanlarda Fors tilidagi adabiyot va ilim markazlaridan biri boʻlgan.\n- Ma’lumotlarga ko‘ra, buyuk shoir **Jomiy** (Abdurrahim Jomiy) Qarshida tug‘ilgan yoki ushbu shahar bilan chambarchas bog‘liq bo‘lgan.\n\n### 4. **Sovet davri va so‘nggi yillar**\n- 1930-yillarida Qarshi mintaqasida aholi ko‘paygani sazdaga, qishloqlarga ajralib, kelib sotilishi ortib borayotgan edi.\n- Hozirgi Qarshi shahri **1939-yilda** hozirgi nomini olgan va keyinchalik Karakalpakiston Respublikasining markazi sifatida kengayib borgan.\n\n### 5. **Madaniy va Tarixiy Meros**\n- **Qarshi yodgorliklari**: So‘nggi yillarda Qarshida qadimiy shahar qal'asi, qadimiy masjidlarning qumi va avlodlari bilan bog‘liq yodgorliklar o‘rganilmoqda.\n- **Jomiy kabiri**: Shahirda shoir Jomiyning qabriga oid avlodlari saqlanib qolgan.\n\n### 6. **Bunday Noma’lumliklar va Tashqi Tarix**\n- Qarshining qadimiy nomi “Karisena” bo‘lganligi haqida tarixchilar o‘rtasida ham bahs-munozaralar bor. Ba’zilari bu shahar hozirgi **Shahrisabz** yaqinida joylashgan degan fikrda, boshqalari esa u **Qarshi** ekanini ta’kidlaydi.\n- Hozirgi Qarshi shahri temir yo‘l va avtomobil yo‘llari bilan bog‘langan muhim shahar hisoblanadi va Karakalpakiston Respublikasining moddiy-madaniy markazlaridan biri.\n\nAgar siz Qarshining ma’lum bir davri (masalan, Amir Temur davri yoki Sovet davri) haqida batafsil ma’lumot xohlasangiz, aniqroq so‘rang, men yordam beraman! ✌️"
-      },
-      {
-        "role": "user",
-        "content": "Menga motivatsiya ber"
-      },
-      {
-        "role": "assistant",
-        "content": "Ravshan, g‘ayrat bilan yashaydigan, har qadamda bilimga va rivojga intiladigan insonning motivatsiyaga ehtiyoji doimiy bo‘ladi. Mana, bugun sana uchun bir necha kuchli fikr:\n\n**1. Nima uchun bog‘lanish kerak?**  \n> *\"Bahona izlamang, yechim toping. Agar bugun og‘ir bo‘lsa, ertangi bugunga qaraganda yengilroq bo‘ladi, tez ekan.\"*  \nKelajagingiz uchun har bir kichik qudrat, har bir yangi bilim qadam, har bir muvaffaqiyat va hayot ko‘zingizni ochadi.\n\n**2. Imtiyozlari nima uchun?**  \n> *\"Muvaffaqiyat katta qadamlardan emas, kichik harakatlardan iborat.\"*  \nBugun bittagina kichik ishni boshlashingiz kafolingiz — asosiy vazifangizni boshlash. Qolgan narsalar oʻzi keladi.\n\n**3. Dunyo quyida bilaringizga:**  \n> *\"Qo‘rqish — normal holat. Lekin qo‘rqish sizni tartibga solmasin, balki ehtiyotkorlikka burilsin.\"*  \nNoto‘g‘ri harakat qilmagan odam — hech qachon muvaffaqiyatga ham erishmaydi. Xato qilishdan qo‘rqmang, faqat xato tanlashingizdan qo‘rqib qolmang.\n\n**4. Sening barcha ishlaringizni bog‘lab qo‘ygan narsa — bu sizning “men”ingiz.**  \n> *\"Boshqalar sizni yutib yuborishi mumkin, lekin siz o‘zingizni tartibga solib qo‘ysangiz – dunyo sizni rad eta olmaydi.\"*\n\n### Bugunlik kichik sovrin:\n✅ **Bittagina vazifani boshlang.**  \n✅ **Ijobiy so‘z ayting (o‘zingizga).**  \n✅ **Kuchlab turgan bir muammo uchun 1 daqiqa o‘ylab, bir qadam tashlang.**\n\nRavshan, ehtimol bugun og‘ir bo‘yayotgan bo‘lsa ham – ertagiga qadar barchasiga og‘ir bo‘ladi. Sizda kuch bor. O‘zingizga ishonch bildirishni unutmang! 💪✨"
+        "content": "Salom! Sizga qanday yordam bera olaman?"
       }
     ],
     "qiziqishlar": []
   },
-  "telegram_8693112606": {
+  "user_15kds1xnh": {
     "ism": "",
     "til": "uz",
     "suhbat": [
       {
         "role": "user",
-        "content": "bugun Toshkentda ob-havo qanday"
+        "content": "salom"
       },
       {
         "role": "assistant",
-        "content": "Bugun Toshkentda ob‑havo 🌦️, harorat +5 °C."
+        "content": "Salom! Sizga qanday yordam bera olaman?"
+      }
+    ],
+    "qiziqishlar": []
+  },
+  "user_guzrgwby3": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [
+      {
+        "role": "user",
+        "content": "salom"
+      },
+      {
+        "role": "assistant",
+        "content": "Va alaykum assalom! Sizga qanday yordam bera olaman?"
       }
     ],
     "qiziqishlar": []
