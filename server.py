@@ -4,7 +4,7 @@ import json
 import threading
 import httpx
 import xml.etree.ElementTree as ET
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from groq import Groq
@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 API_KEY = os.environ.get("GROQ_API_KEY", "")
-TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "9010906740:AAFruhdfoKLCbVr4d_d1iSVCnoXeTKPS6Ao")
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
 IS_RENDER = os.environ.get("RENDER", False)
 
 if IS_RENDER:
@@ -90,8 +90,6 @@ def yangilik_mavzusi(savol):
         return "business"
     return "world"
 
-bot_boshlandi = False
-
 def keep_alive():
     while True:
         time.sleep(600)
@@ -108,51 +106,40 @@ def telegram_yuborish(chat_id, matn):
     except Exception as e:
         print("Telegram xato:", e)
 
-def telegram_bot():
-    global bot_boshlandi
-    if bot_boshlandi:
-        return
-    bot_boshlandi = True
-    print("Telegram bot ishga tushdi!")
+def telegram_xabar_qayta_ishlash(update):
     try:
-        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/getUpdates"
-        r = http_client.get(url, params={"timeout": 1}, timeout=5)
-        updates = r.json().get("result", [])
-        offset = updates[-1]["update_id"] + 1 if updates else None
-    except Exception:
-        offset = None
-    while True:
-        try:
-            url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/getUpdates"
-            params = {"timeout": 10, "limit": 10}
-            if offset:
-                params["offset"] = offset
-            r = http_client.get(url, params=params, timeout=15)
-            for update in r.json().get("result", []):
-                offset = update["update_id"] + 1
-                message = update.get("message", {})
-                chat_id = message.get("chat", {}).get("id")
-                matn = message.get("text", "")
-                if chat_id and matn:
-                    session_id = f"telegram_{chat_id}"
-                    if matn == "/start":
-                        telegram_yuborish(chat_id, "Salom! Men RAV AI!\nIsmingizni ayting!\n/yangiliklar - so'nggi xabarlar")
-                    elif matn == "/yangiliklar":
-                        yangiliklar = yangiliklar_olish("world")
-                        if yangiliklar:
-                            javob = "📰 So'nggi yangiliklar:\n\n" + "\n".join([f"{i+1}. {y}" for i, y in enumerate(yangiliklar)])
-                        else:
-                            javob = "Yangiliklar yuklanmadi."
-                        telegram_yuborish(chat_id, javob)
-                    else:
-                        javob = gemini_javob(matn, session_id)
-                        telegram_yuborish(chat_id, javob)
-        except Exception as e:
-            print("Bot xato:", e)
-            time.sleep(5)
+        message = update.get("message", {})
+        chat_id = message.get("chat", {}).get("id")
+        matn = message.get("text", "")
+        if chat_id and matn:
+            session_id = f"telegram_{chat_id}"
+            if matn == "/start":
+                telegram_yuborish(chat_id, "Salom! Men RAV AI!\nIsmingizni ayting!/yangiliklar - so'nggi xabarlar")
+            elif matn == "/yangiliklar":
+                yangiliklar = yangiliklar_olish("world")
+                if yangiliklar:
+                    javob = "So'nggi yangiliklar:\n" + "\n".join([f"{i+1}. {y}" for i, y in enumerate(yangiliklar)])
+                else:
+                    javob = "Yangiliklar yuklanmadi."
+                telegram_yuborish(chat_id, javob)
+            else:
+                javob = gemini_javob(matn, session_id)
+                telegram_yuborish(chat_id, javob)
+    except Exception as e:
+        print("Xabar xatosi:", e)
+
+def webhook_ornatish():
+    time.sleep(3)
+    try:
+        webhook_url = f"https://rav-ai.onrender.com/telegram/{TELEGRAM_TOKEN}"
+        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/setWebhook"
+        r = http_client.post(url, json={"url": webhook_url})
+        print("Webhook:", r.json())
+    except Exception as e:
+        print("Webhook xatosi:", e)
 
 threading.Thread(target=keep_alive, daemon=True).start()
-threading.Thread(target=telegram_bot, daemon=True).start()
+threading.Thread(target=webhook_ornatish, daemon=True).start()
 
 def shahar_topish(savol):
     savol_lower = savol.lower()
@@ -184,22 +171,15 @@ def shahar_topish(savol):
         "tojikiston": "Dushanbe", "tajikistan": "Dushanbe",
         "turkmaniston": "Ashgabat", "turkmenistan": "Ashgabat",
         "afgoniston": "Kabul", "afghanistan": "Kabul",
-        "marokash": "Casablanca", "morocco": "Casablanca",
-        "keniya": "Nairobi", "kenya": "Nairobi",
-        "kolumbiya": "Bogota", "colombia": "Bogota",
-        "peru": "Lima", "chili": "Santiago", "chile": "Santiago",
     }
     for kalit, shahar in mamlakatlar.items():
         if kalit in savol_lower:
             return shahar
     shaharlar = [
         "toshkent", "samarqand", "buxoro", "namangan", "andijon",
-        "dubai", "dubay", "moscow", "london", "paris", "berlin",
-        "rome", "madrid", "amsterdam", "vienna", "new york",
-        "beijing", "shanghai", "tokyo", "seoul", "delhi", "mumbai",
-        "istanbul", "cairo", "sydney", "singapore", "bangkok",
-        "karachi", "tehran", "kyiv", "baku", "bishkek",
-        "dushanbe", "ashgabat", "almaty", "riyadh", "doha",
+        "dubai", "moscow", "london", "paris", "berlin",
+        "tokyo", "seoul", "delhi", "istanbul", "cairo",
+        "sydney", "singapore", "bangkok", "karachi", "baku",
     ]
     for shahar in shaharlar:
         if shahar in savol_lower:
@@ -212,8 +192,7 @@ def internet_qidirish(savol):
         mavzu = yangilik_mavzusi(savol)
         yangiliklar = yangiliklar_olish(mavzu)
         if yangiliklar:
-           natija += "Yangiliklar:" + "\n".join([f"{i+1}. {y[:80]}" for i, y in enumerate(yangiliklar[:3])]) + ""
-
+            natija += "Yangiliklar:" + "".join([f"{i+1}. {y[:80]}" for i, y in enumerate(yangiliklar[:3])])
     kalit_sozlar = ["hozir", "bugun", "ob-havo", "ob havo", "weather", "harorat", "iqlim"]
     if any(soz in savol.lower() for soz in kalit_sozlar):
         try:
@@ -284,15 +263,23 @@ def bosh_sahifa():
     with open("index.html", "r", encoding="utf-8") as f:
         return f.read()
 
+@app.post(f"/telegram/{TELEGRAM_TOKEN}")
+async def telegram_webhook(request: Request):
+    try:
+        update = await request.json()
+        threading.Thread(target=telegram_xabar_qayta_ishlash, args=(update,), daemon=True).start()
+    except Exception as e:
+        print("Webhook xato:", e)
+    return {"ok": True}
+
 @app.post("/savol")
 def savol_yuborish(data: SavolModel):
     if kerak_mi_yangilik(data.matn):
         mavzu = yangilik_mavzusi(data.matn)
         yangiliklar = yangiliklar_olish(mavzu)
         if yangiliklar:
-           javob = "📰 So'nggi yangiliklar:\n\n" + "\n".join([f"{i+1}. {y}" for i, y in enumerate(yangiliklar)])
-
-        return {"javob": javob}
+            javob = "So'nggi yangiliklar:\n" + "\n".join([f"{i+1}. {y}" for i, y in enumerate(yangiliklar)])
+            return {"javob": javob}
     javob = gemini_javob(data.matn, data.session_id)
     return {"javob": javob}
 

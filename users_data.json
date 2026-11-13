@@ -46,6 +46,53 @@
       {
         "role": "assistant",
         "content": "Va alaykum assalom! Sizga qanday yordam bera olaman?"
+      },
+      {
+        "role": "user",
+        "content": "ishla qale"
+      },
+      {
+        "role": "assistant",
+        "content": "Rahmat! Men shunchaki muhitdaman, emmaym!? 😄\n\nKichkinator! Sen qandaysan?"
+      },
+      {
+        "role": "user",
+        "content": "yahshiku"
+      },
+      {
+        "role": "assistant",
+        "content": "Rahmat, Yahshiku! Sen qandaysan?"
+      },
+      {
+        "role": "user",
+        "content": "yahshi"
+      },
+      {
+        "role": "assistant",
+        "content": "Mening ham muloyimligim bor."
+      }
+    ],
+    "qiziqishlar": []
+  },
+  "user_qji2qmd4q": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [
+      {
+        "role": "user",
+        "content": "salom"
+      },
+      {
+        "role": "assistant",
+        "content": "Salom! Sizga qanday yordam bera olaman?"
+      },
+      {
+        "role": "user",
+        "content": "nima gapla"
+      },
+      {
+        "role": "assistant",
+        "content": "Menda savollaringiz bormi yoki biror mavzunu muhokama qilmoqchimisiz? Men sizga kod yozish, matnlar bilan ishlash, tarjima qilish, tushuntirish berish yoki shunchaki suhbatlashishda yordam bera olaman.\n\nAytib bering, bugun siz bilan nima qilaylik? 😊"
       }
     ],
     "qiziqishlar": []

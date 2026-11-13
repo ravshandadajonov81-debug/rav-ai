@@ -1,146 +1,302 @@
-html = open("index.html", "w", encoding="utf-8")
-html.write("""<!DOCTYPE html>
-<html lang="uz">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RAV AI</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Segoe UI',Arial,sans-serif;background:#0a0a0f;color:white;height:100vh;display:flex;flex-direction:column;}
-.header{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:12px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #00d4ff44;}
-.logo{width:42px;height:42px;background:linear-gradient(135deg,#00d4ff,#0066ff);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;}
-.header-info h1{font-size:18px;color:#00d4ff;}
-.header-info p{font-size:11px;color:#88aacc;}
-.status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;color:#00ff88;}
-.status-dot{width:8px;height:8px;background:#00ff88;border-radius:50%;animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
-.chat{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:15px;}
-.chat::-webkit-scrollbar{width:4px;}
-.chat::-webkit-scrollbar-thumb{background:#00d4ff44;border-radius:2px;}
-.xabar{display:flex;gap:10px;align-items:flex-start;animation:fadeIn 0.3s ease;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-.xabar.user{flex-direction:row-reverse;}
-.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
-.avatar.ai{background:linear-gradient(135deg,#00d4ff,#0066ff);}
-.avatar.usr{background:linear-gradient(135deg,#ff6b6b,#ff4444);}
-.bubble{max-width:75%;padding:12px 16px;border-radius:18px;font-size:14px;line-height:1.6;word-break:break-word;}
-.bubble.ai{background:#1a1a2e;border:1px solid #00d4ff22;border-top-left-radius:4px;color:#e0e8ff;}
-.bubble.user{background:linear-gradient(135deg,#0066ff,#0044cc);border-top-right-radius:4px;color:white;}
-.vaqt{font-size:10px;color:#446688;margin-top:4px;}
-.xabar.user .vaqt{text-align:right;}
-.yozayapti{display:none;gap:10px;align-items:center;padding:0 20px 5px;}
-.yozayapti.ko{display:flex;}
-.dots span{display:inline-block;width:6px;height:6px;background:#00d4ff;border-radius:50%;margin:0 2px;animation:bounce 1.2s infinite;}
-.dots span:nth-child(2){animation-delay:0.2s;}
-.dots span:nth-child(3){animation-delay:0.4s;}
-@keyframes bounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);}}
-.tezkor{padding:10px 20px;display:flex;gap:8px;overflow-x:auto;border-top:1px solid #ffffff11;}
-.tezkor button{background:#1a1a2e;border:1px solid #00d4ff33;color:#88aacc;padding:6px 14px;border-radius:20px;font-size:12px;cursor:pointer;white-space:nowrap;transition:all 0.2s;}
-.tezkor button:hover{background:#00d4ff22;border-color:#00d4ff;color:#00d4ff;}
-.input-zona{padding:12px 20px;background:#0f0f1a;border-top:1px solid #ffffff11;display:flex;gap:10px;align-items:flex-end;}
-.input-wrapper{flex:1;background:#1a1a2e;border:1px solid #00d4ff33;border-radius:24px;padding:10px 16px;display:flex;align-items:center;gap:8px;transition:border-color 0.2s;}
-.input-wrapper:focus-within{border-color:#00d4ff;}
-#savol{flex:1;background:none;border:none;color:white;font-size:14px;outline:none;resize:none;max-height:100px;font-family:inherit;}
-#savol::placeholder{color:#446688;}
-.mik-btn{background:none;border:none;color:#446688;font-size:18px;cursor:pointer;}
-.mik-btn:hover{color:#00d4ff;}
-.mik-btn.tinglayapti{color:#ff4444;}
-.yubor-btn{width:44px;height:44px;background:linear-gradient(135deg,#00d4ff,#0066ff);border:none;border-radius:50%;color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.yubor-btn:hover{transform:scale(1.05);}
-.xush{text-align:center;padding:40px 20px;color:#446688;}
-.xush h2{color:#00d4ff;font-size:28px;margin-bottom:8px;}
-.xush p{font-size:14px;}
-img.rasm{max-width:280px;border-radius:12px;margin-top:8px;border:1px solid #00d4ff33;}
-</style>
-</head>
-<body>
-<div class="header">
-<div class="logo">&#129302;</div>
-<div class="header-info"><h1>RAV AI</h1><p>Aqlli shaxsiy yordamchi</p></div>
-<div class="status"><div class="status-dot"></div>Jonli</div>
-</div>
-<div class="chat" id="chat">
-<div class="xush"><h2>&#129302; RAV AI</h2><p>Salom! Men sizning aqlli yordamchingizman.Har qanday savolingizni yozing!</p></div>
-</div>
-<div class="yozayapti" id="yozayapti">
-<div class="avatar ai">&#129302;</div>
-<div class="dots"><span></span><span></span><span></span></div>
-</div>
-<div class="tezkor">
-<button onclick="tezkor('Salom!')">&#128075; Salom</button>
-<button onclick="tezkor('Menga motivatsiya ber')">&#128170; Motivatsiya</button>
-<button onclick="tezkor('Qiziqarli fakt ayt')">&#129504; Fakt</button>
-<button onclick="tezkor('yangiliklar')">&#128240; Yangiliklar</button>
-<button onclick="tezkor('Bugun ob havo qanday?')">&#127780; Ob-havo</button>
-<button onclick="tezkor('Menga sher yoz')">&#128221; She\\'r</button>
-<button onclick="tezkor('Python nima?')">&#128013; Python</button>
-<button onclick="rasmSorash()">&#127912; Rasm</button>
-</div>
-<div class="input-zona">
-<div class="input-wrapper">
-<textarea id="savol" rows="1" placeholder="Savolingizni yozing..."></textarea>
-<button class="mik-btn" id="mikBtn" onclick="ovoz()">&#127908;</button>
-</div>
-<button class="yubor-btn" onclick="yuborish()">&#10148;</button>
-</div>
-<script>
-var sid='user_'+Math.random().toString(36).substr(2,9);
-function vaqt(){var d=new Date();return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
-function qosh(rol,matn,img){
-var chat=document.getElementById('chat');
-var div=document.createElement('div');
-div.className='xabar '+(rol==='user'?'user':'ai-msg');
-var av='<div class="avatar '+(rol==='user'?'usr':'ai')+'">'+(rol==='user'?'&#128100;':'&#129302;')+'</div>';
-var content=matn.replace(/\\n/g,'');
-if(img)content+='<img class=\\"rasm\\" src=\\"'+img+'\\" onload=\\"document.getElementById(\\'chat\\').scrollTop=99999\\">';
-var bub='<div><div class="bubble '+(rol==='user'?'user':'ai')+'">'+content+'</div><div class="vaqt">'+vaqt()+'</div></div>';
-div.innerHTML=rol==='user'?bub+av:av+bub;
-chat.appendChild(div);
-chat.scrollTop=chat.scrollHeight;
-}
-async function yuborish(){
-var inp=document.getElementById('savol');
-var m=inp.value.trim();
-if(!m)return;
-inp.value='';inp.style.height='auto';
-qosh('user',m);
-document.getElementById('yozayapti').className='yozayapti ko';
-try{
-var r=await fetch('/savol',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({matn:m,session_id:sid})});
-var d=await r.json();
-document.getElementById('yozayapti').className='yozayapti';
-qosh('ai',d.javob||'Xato!');
-if(window.speechSynthesis){var u=new SpeechSynthesisUtterance(d.javob);u.lang='uz-UZ';speechSynthesis.speak(u);}
-}catch(e){document.getElementById('yozayapti').className='yozayapti';qosh('ai','Xato yuz berdi!');}
-}
-function tezkor(m){document.getElementById('savol').value=m;yuborish();}
-async function rasmSorash(){
-var m=prompt('Rasm tavsifi:');
-if(!m)return;
-qosh('user','&#127912; '+m);
-document.getElementById('yozayapti').className='yozayapti ko';
-try{
-var r=await fetch('/rasm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({matn:m})});
-var d=await r.json();
-document.getElementById('yozayapti').className='yozayapti';
-if(d.rasm_url)qosh('ai','&#127912; Rasm tayyor!',d.rasm_url);
-}catch(e){document.getElementById('yozayapti').className='yozayapti';qosh('ai','Rasm yuklanmadi!');}
-}
-function ovoz(){
-var btn=document.getElementById('mikBtn');
-if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){alert('Ovoz qollab-quvvatlanmaydi!');return;}
-var rec=new(window.SpeechRecognition||window.webkitSpeechRecognition)();
-rec.lang='uz-UZ';rec.start();
-btn.className='mik-btn tinglayapti';btn.innerHTML='&#128308;';
-rec.onresult=function(e){document.getElementById('savol').value=e.results[0][0].transcript;btn.className='mik-btn';btn.innerHTML='&#127908;';yuborish();};
-rec.onerror=rec.onend=function(){btn.className='mik-btn';btn.innerHTML='&#127908;';};
-}
-var inp=document.getElementById('savol');
-inp.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();yuborish();}});
-inp.addEventListener('input',function(){inp.style.height='auto';inp.style.height=inp.scrollHeight+'px';});
-</script>
-</body>
-</html>""")
-html.close()
+f = open("server.py", "w", encoding="utf-8")
+f.write('''import os
+import time
+import json
+import threading
+import httpx
+import xml.etree.ElementTree as ET
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from pydantic import BaseModel
+from groq import Groq
+from dotenv import load_dotenv
+
+load_dotenv()
+
+API_KEY = os.environ.get("GROQ_API_KEY", "")
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
+IS_RENDER = os.environ.get("RENDER", False)
+
+if IS_RENDER:
+    http_client = httpx.Client(follow_redirects=True)
+else:
+    http_client = httpx.Client(verify=False, follow_redirects=True)
+
+client = Groq(api_key=API_KEY, http_client=http_client)
+app = FastAPI()
+
+USERS_FILE = "users_data.json"
+
+def users_yuklash():
+    if os.path.exists(USERS_FILE):
+        with open(USERS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+def users_saqlash(data):
+    with open(USERS_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+def foydalanuvchi_olish(session_id):
+    users = users_yuklash()
+    if session_id not in users:
+        users[session_id] = {"ism": "", "til": "uz", "suhbat": [], "qiziqishlar": []}
+        users_saqlash(users)
+    return users[session_id]
+
+def foydalanuvchi_yangilash(session_id, data):
+    users = users_yuklash()
+    users[session_id] = data
+    users_saqlash(users)
+
+def yangiliklar_olish(mavzu="world"):
+    manbalar = {
+        "world": "https://feeds.bbci.co.uk/news/rss.xml",
+        "tech": "https://feeds.bbci.co.uk/news/technology/rss.xml",
+        "sport": "https://feeds.bbci.co.uk/news/sport/rss.xml",
+        "science": "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
+        "business": "https://feeds.bbci.co.uk/news/business/rss.xml",
+    }
+    url = manbalar.get(mavzu, manbalar["world"])
+    try:
+        r = http_client.get(url, timeout=10)
+        root = ET.fromstring(r.text)
+        yangiliklar = []
+        for item in root.findall(".//item")[:5]:
+            title = item.find("title")
+            if title is not None:
+                yangiliklar.append(title.text)
+        return yangiliklar
+    except Exception as e:
+        print("Yangiliklar xatosi:", e)
+        return []
+
+def kerak_mi_yangilik(savol):
+    kalit_sozlar = ["yangilik", "xabar", "news", "so\'nggi", "bugun nima", "dunyo", "texnologiya", "sport", "iqtisod"]
+    savol_lower = savol.lower()
+    for soz in kalit_sozlar:
+        if soz in savol_lower:
+            return True
+    return False
+
+def yangilik_mavzusi(savol):
+    savol_lower = savol.lower()
+    if any(w in savol_lower for w in ["texnologiya", "tech", "it", "kompyuter"]):
+        return "tech"
+    if any(w in savol_lower for w in ["sport", "futbol", "basketbol"]):
+        return "sport"
+    if any(w in savol_lower for w in ["ilm", "fan", "science"]):
+        return "science"
+    if any(w in savol_lower for w in ["iqtisod", "biznes", "business", "pul"]):
+        return "business"
+    return "world"
+
+def keep_alive():
+    while True:
+        time.sleep(600)
+        try:
+            http_client.get("https://rav-ai.onrender.com", timeout=10)
+            print("Keep alive!")
+        except Exception:
+            pass
+
+def telegram_yuborish(chat_id, matn):
+    try:
+        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+        http_client.post(url, json={"chat_id": chat_id, "text": matn})
+    except Exception as e:
+        print("Telegram xato:", e)
+
+def telegram_xabar_qayta_ishlash(update):
+    try:
+        message = update.get("message", {})
+        chat_id = message.get("chat", {}).get("id")
+        matn = message.get("text", "")
+        if chat_id and matn:
+            session_id = f"telegram_{chat_id}"
+            if matn == "/start":
+                telegram_yuborish(chat_id, "Salom! Men RAV AI!\\nIsmingizni ayting!\
+/yangiliklar - so\'nggi xabarlar")
+            elif matn == "/yangiliklar":
+                yangiliklar = yangiliklar_olish("world")
+                if yangiliklar:
+                    javob = "So\'nggi yangiliklar:\\n\
+" + "\\n".join([f"{i+1}. {y}" for i, y in enumerate(yangiliklar)])
+                else:
+                    javob = "Yangiliklar yuklanmadi."
+                telegram_yuborish(chat_id, javob)
+            else:
+                javob = gemini_javob(matn, session_id)
+                telegram_yuborish(chat_id, javob)
+    except Exception as e:
+        print("Xabar xatosi:", e)
+
+def webhook_ornatish():
+    time.sleep(3)
+    try:
+        webhook_url = f"https://rav-ai.onrender.com/telegram/{TELEGRAM_TOKEN}"
+        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/setWebhook"
+        r = http_client.post(url, json={"url": webhook_url})
+        print("Webhook:", r.json())
+    except Exception as e:
+        print("Webhook xatosi:", e)
+
+threading.Thread(target=keep_alive, daemon=True).start()
+threading.Thread(target=webhook_ornatish, daemon=True).start()
+
+def shahar_topish(savol):
+    savol_lower = savol.lower()
+    mamlakatlar = {
+        "fransiya": "Paris", "france": "Paris",
+        "rossiya": "Moscow", "russia": "Moscow",
+        "angliya": "London", "england": "London",
+        "germaniya": "Berlin", "germany": "Berlin",
+        "xitoy": "Beijing", "china": "Beijing",
+        "yaponiya": "Tokyo", "japan": "Tokyo",
+        "amerika": "New+York", "usa": "New+York",
+        "hindiston": "Delhi", "india": "Delhi",
+        "italiya": "Rome", "italy": "Rome",
+        "turkiya": "Istanbul", "turkey": "Istanbul",
+        "ozbekiston": "Tashkent", "uzbekistan": "Tashkent",
+        "qozogiston": "Almaty", "kazakhstan": "Almaty",
+        "misr": "Cairo", "egypt": "Cairo",
+        "braziliya": "Sao+Paulo", "brazil": "Sao+Paulo",
+        "avstraliya": "Sydney", "australia": "Sydney",
+        "kanada": "Toronto", "canada": "Toronto",
+        "pokiston": "Karachi", "pakistan": "Karachi",
+        "tailand": "Bangkok", "thailand": "Bangkok",
+        "saudiya": "Riyadh", "saudi": "Riyadh",
+        "bae": "Dubai", "uae": "Dubai",
+        "ispaniya": "Madrid", "spain": "Madrid",
+        "ukraina": "Kyiv", "ukraine": "Kyiv",
+        "ozarbayjon": "Baku", "azerbaijan": "Baku",
+        "qirgiziston": "Bishkek", "kyrgyzstan": "Bishkek",
+        "tojikiston": "Dushanbe", "tajikistan": "Dushanbe",
+        "turkmaniston": "Ashgabat", "turkmenistan": "Ashgabat",
+        "afgoniston": "Kabul", "afghanistan": "Kabul",
+    }
+    for kalit, shahar in mamlakatlar.items():
+        if kalit in savol_lower:
+            return shahar
+    shaharlar = [
+        "toshkent", "samarqand", "buxoro", "namangan", "andijon",
+        "dubai", "moscow", "london", "paris", "berlin",
+        "tokyo", "seoul", "delhi", "istanbul", "cairo",
+        "sydney", "singapore", "bangkok", "karachi", "baku",
+    ]
+    for shahar in shaharlar:
+        if shahar in savol_lower:
+            return shahar.replace(" ", "+").title()
+    return "Tashkent"
+
+def internet_qidirish(savol):
+    natija = ""
+    if kerak_mi_yangilik(savol):
+        mavzu = yangilik_mavzusi(savol)
+        yangiliklar = yangiliklar_olish(mavzu)
+        if yangiliklar:
+            natija += "Yangiliklar:" + "\
+".join([f"{i+1}. {y[:80]}" for i, y in enumerate(yangiliklar[:3])])
+    kalit_sozlar = ["hozir", "bugun", "ob-havo", "ob havo", "weather", "harorat", "iqlim"]
+    if any(soz in savol.lower() for soz in kalit_sozlar):
+        try:
+            shahar = shahar_topish(savol)
+            url = "https://wttr.in/" + shahar + "?format=3"
+            r = http_client.get(url, timeout=5)
+            if r.status_code == 200:
+                natija += "Ob-havo: " + r.text
+        except Exception as e:
+            print("Ob-havo xatosi:", e)
+    return natija
+
+def gemini_javob(savol, session_id="default"):
+    user = foydalanuvchi_olish(session_id)
+    internet_malumot = internet_qidirish(savol)
+    user["suhbat"].append({"role": "user", "content": savol})
+    if len(user["suhbat"]) > 20:
+        user["suhbat"] = user["suhbat"][-20:]
+    system = "Sen RAV AI degan eng aqlli shaxsiy assistantsan. Foydalanuvchi qaysi tilda yozsa, osha tilda javob ber. Suhbat tarixini eslab qol. Foydalanuvchi ismini aytsa eslab qol."
+    if user["ism"]:
+        system += f" Foydalanuvchi ismi: {user[\'ism\']}."
+    if internet_malumot:
+        system += "\\nInternet malumotlari:\\n" + internet_malumot
+    messages = [{"role": "system", "content": system}] + user["suhbat"]
+    for urinish in range(3):
+        try:
+            response = client.chat.completions.create(
+                model="qwen/qwen3.8-27b",
+                messages=messages,
+                max_tokens=2048,
+            )
+            javob = response.choices[0].message.content
+            user["suhbat"].append({"role": "assistant", "content": javob})
+            if not user["ism"] and "ismim" in savol.lower():
+                words = savol.split()
+                for i, w in enumerate(words):
+                    if w.lower() in ["ismim", "ismim:"]:
+                        if i + 1 < len(words):
+                            user["ism"] = words[i + 1].strip(".,!")
+            foydalanuvchi_yangilash(session_id, user)
+            return javob
+        except Exception:
+            if urinish < 2:
+                time.sleep(2)
+            else:
+                return "Hozir server band. Biroz kutib qayta yuboring!"
+
+def rasm_prompt_tayyorla(matn):
+    try:
+        response = client.chat.completions.create(
+            model="openai/gpt-oss-120b",
+            messages=[{"role": "user", "content": f"Convert this to a detailed English image prompt (max 15 words, no quotes): {matn}"}],
+            max_tokens=40,
+        )
+        return response.choices[0].message.content.strip().strip(\'"\').strip("\'")
+    except Exception:
+        return matn
+
+class SavolModel(BaseModel):
+    matn: str
+    session_id: str = "default"
+
+class RasmModel(BaseModel):
+    matn: str
+
+@app.get("/", response_class=HTMLResponse)
+def bosh_sahifa():
+    with open("index.html", "r", encoding="utf-8") as f:
+        return f.read()
+
+@app.post(f"/telegram/{TELEGRAM_TOKEN}")
+async def telegram_webhook(request: Request):
+    try:
+        update = await request.json()
+        threading.Thread(target=telegram_xabar_qayta_ishlash, args=(update,), daemon=True).start()
+    except Exception as e:
+        print("Webhook xato:", e)
+    return {"ok": True}
+
+@app.post("/savol")
+def savol_yuborish(data: SavolModel):
+    if kerak_mi_yangilik(data.matn):
+        mavzu = yangilik_mavzusi(data.matn)
+        yangiliklar = yangiliklar_olish(mavzu)
+        if yangiliklar:
+            javob = "So\'nggi yangiliklar:\\n\
+" + "\\n".join([f"{i+1}. {y}" for i, y in enumerate(yangiliklar)])
+            return {"javob": javob}
+    javob = gemini_javob(data.matn, data.session_id)
+    return {"javob": javob}
+
+@app.post("/rasm")
+def rasm_yaratish(data: RasmModel):
+    try:
+        prompt = rasm_prompt_tayyorla(data.matn)
+        prompt_full = prompt + ", ultra realistic, 4K, professional photography, detailed"
+        url = "https://image.pollinations.ai/prompt/" + prompt_full.replace(" ", "%20") + "?model=flux&width=1024&height=1024&nologo=true"
+        return {"rasm_url": url}
+    except Exception as e:
+        return {"xato": str(e)}
+''')
+f.close()
 print("OK!")
