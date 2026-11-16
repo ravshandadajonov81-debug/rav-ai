@@ -186,39 +186,6 @@ def shahar_topish(savol):
             return shahar.replace(" ", "+").title()
     return "Tashkent"
 
-def ob_havo_olish(shahar):
-    try:
-        url = "https://wttr.in/" + shahar + "?format=j1"
-        r = http_client.get(url, timeout=8)
-        if r.status_code == 200:
-            d = r.json()
-            cur = d["current_condition"][0]
-            harorat = cur["temp_C"]
-            his = cur["FeelsLikeC"]
-            namlik = cur["humidity"]
-            shamol = cur["windspeedKmph"]
-            tavsif = cur["weatherDesc"][0]["value"]
-            korinish = cur["visibility"]
-            weather3 = d["weather"]
-            prognoz = ""
-            kunlar = ["Bugun", "Ertaga", "Indinga"]
-            for i, w in enumerate(weather3[:3]):
-                min_t = w["mintempC"]
-                max_t = w["maxtempC"]
-                tavsif3 = w["hourly"][4]["weatherDesc"][0]["value"]
-                prognoz += f"{kunlar[i]}: {min_t}C ~ {max_t}C, {tavsif3}\n"
-            return f"Toshkent ob-havosi:\nHarorat: {harorat}C (his: {his}C)Namlik: {namlik}%Shamol: {shamol} km/hHolat: {tavsif}\n3 kunlik:\n{prognoz}"
-    except Exception as e:
-        print("Ob-havo xatosi:", e)
-    try:
-        url = "https://wttr.in/" + shahar + "?format=3"
-        r = http_client.get(url, timeout=5)
-        if r.status_code == 200:
-            return "Ob-havo: " + r.text
-    except:
-        pass
-    return ""
-
 def internet_qidirish(savol):
     natija = ""
     if kerak_mi_yangilik(savol):
@@ -233,7 +200,7 @@ def internet_qidirish(savol):
             url = "https://wttr.in/" + shahar + "?format=3"
             r = http_client.get(url, timeout=5)
             if r.status_code == 200:
-                natija += ob_havo_olish(shahar)
+                natija += "Ob-havo: " + r.text
         except Exception as e:
             print("Ob-havo xatosi:", e)
     return natija

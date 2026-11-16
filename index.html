@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+html = open("index.html", "w", encoding="utf-8")
+html.write("""<!DOCTYPE html>
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
@@ -71,8 +72,8 @@ img.rasm{max-width:280px;border-radius:12px;margin-top:8px;border:1px solid #00d
 <button onclick="tezkor('Menga motivatsiya ber')">&#128170; Motivatsiya</button>
 <button onclick="tezkor('Qiziqarli fakt ayt')">&#129504; Fakt</button>
 <button onclick="tezkor('yangiliklar')">&#128240; Yangiliklar</button>
-<button onclick="tezkor('Bugun ob havo qanday?')">&#127780; Ob-havo</button>
-<button onclick="tezkor('Menga sher yoz')">&#128221; She\'r</button>
+<button onclick="tezkor('Toshkentda ob-havo qanday?')">&#127780; Ob-havo</button>
+<button onclick="tezkor('Menga sher yoz')">&#128221; She\\'r</button>
 <button onclick="tezkor('Python nima?')">&#128013; Python</button>
 <button onclick="rasmSorash()">&#127912; Rasm</button>
 </div>
@@ -91,8 +92,8 @@ var chat=document.getElementById('chat');
 var div=document.createElement('div');
 div.className='xabar '+(rol==='user'?'user':'ai-msg');
 var av='<div class="avatar '+(rol==='user'?'usr':'ai')+'">'+(rol==='user'?'&#128100;':'&#129302;')+'</div>';
-var content=matn.replace(/\n/g,'');
-if(img)content+='<img class=\"rasm\" src=\"'+img+'\" onload=\"document.getElementById(\'chat\').scrollTop=99999\">';
+var content=matn.replace(/\\n/g,'');
+if(img)content+='<br><img class=\\"rasm\\" src=\\"'+img+'\\" onload=\\"document.getElementById(\'chat\').scrollTop=99999\\">';
 var bub='<div><div class="bubble '+(rol==='user'?'user':'ai')+'">'+content+'</div><div class="vaqt">'+vaqt()+'</div></div>';
 div.innerHTML=rol==='user'?bub+av:av+bub;
 chat.appendChild(div);
@@ -140,4 +141,3 @@ inp.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.pr
 inp.addEventListener('input',function(){inp.style.height='auto';inp.style.height=inp.scrollHeight+'px';});
 </script>
 </body>
-</html>
