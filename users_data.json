@@ -132,5 +132,44 @@
     "til": "uz",
     "suhbat": [],
     "qiziqishlar": []
+  },
+  "user_efjayc19z": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [],
+    "qiziqishlar": []
+  },
+  "user_3igm4bnea": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [],
+    "qiziqishlar": []
+  },
+  "user_3bw4ycmyx": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [],
+    "qiziqishlar": []
+  },
+  "user_sn8zv60x3": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [],
+    "qiziqishlar": []
+  },
+  "user_1xieontg6": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [
+      {
+        "role": "user",
+        "content": "salom"
+      },
+      {
+        "role": "assistant",
+        "content": "Salom! Sizga qanday yordam bera olaman?"
+      }
+    ],
+    "qiziqishlar": []
   }
 }
