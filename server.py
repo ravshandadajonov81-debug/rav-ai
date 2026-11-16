@@ -184,7 +184,49 @@ def shahar_topish(savol):
     for shahar in shaharlar:
         if shahar in savol_lower:
             return shahar.replace(" ", "+").title()
+    words = savol.replace("?","").replace("!","").replace(".","").replace(",","").split()
+    stop = ["ob-havo","ob","havo","qanday","hozir","bugun","weather","harorat","iqlim","da","de","ni","ning","qanday"]
+    for w in reversed(words):
+        if w.lower() not in stop and len(w) > 2:
+            shahar = w
+            for end in ["da","de","ni","ga","dan"]:
+                if shahar.lower().endswith(end) and len(shahar) > len(end)+2:
+                    shahar = shahar[:-len(end)]
+                    break
+            return shahar.title()
     return "Tashkent"
+
+def ob_havo_olish(shahar):
+    try:
+        url = "https://wttr.in/" + shahar.replace(" ", "+") + "?format=j1"
+        r = http_client.get(url, timeout=8)
+        if r.status_code == 200:
+            d = r.json()
+            cur = d["current_condition"][0]
+            harorat = cur["temp_C"]
+            his = cur["FeelsLikeC"]
+            namlik = cur["humidity"]
+            shamol = cur["windspeedKmph"]
+            tavsif = cur["weatherDesc"][0]["value"]
+            weather3 = d["weather"]
+            prognoz = ""
+            kunlar = ["Bugun", "Ertaga", "Indinga"]
+            for i, w in enumerate(weather3[:3]):
+                min_t = w["mintempC"]
+                max_t = w["maxtempC"]
+                tavsif3 = w["hourly"][4]["weatherDesc"][0]["value"]
+                prognoz += f"{kunlar[i]}: {min_t}C ~ {max_t}C, {tavsif3}\n"
+            return f"{shahar} ob-havosi:\nHarorat: {harorat}C (his: {his}C)Namlik: {namlik}%\nShamol: {shamol} km/hHolat: {tavsif}\n3 kunlik:\n{prognoz}"
+    except Exception as e:
+        print("Ob-havo xatosi:", e)
+    try:
+        url = "https://wttr.in/" + shahar.replace(" ", "+") + "?format=3"
+        r = http_client.get(url, timeout=5)
+        if r.status_code == 200:
+            return "Ob-havo: " + r.text
+    except:
+        pass
+    return ""
 
 def internet_qidirish(savol):
     natija = ""
@@ -280,6 +322,12 @@ def savol_yuborish(data: SavolModel):
         if yangiliklar:
             javob = "So'nggi yangiliklar:\n" + "\n".join([f"{i+1}. {y}" for i, y in enumerate(yangiliklar)])
             return {"javob": javob}
+    kalit_ob = ["ob-havo", "ob havo", "havo", "weather", "harorat", "iqlim"]
+    if any(s in data.matn.lower() for s in kalit_ob):
+        shahar = shahar_topish(data.matn)
+        ob = ob_havo_olish(shahar)
+        if ob:
+            return {"javob": ob}
     javob = gemini_javob(data.matn, data.session_id)
     return {"javob": javob}
 
