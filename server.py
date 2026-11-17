@@ -37,14 +37,12 @@ def users_saqlash(data):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 def foydalanuvchi_olish(session_id):
-    users = users_yuklash()
     if session_id not in users:
         users[session_id] = {"ism": "", "til": "uz", "suhbat": [], "qiziqishlar": []}
         users_saqlash(users)
     return users[session_id]
 
 def foydalanuvchi_yangilash(session_id, data):
-    users = users_yuklash()
     users[session_id] = data
     users_saqlash(users)
 
@@ -122,6 +120,12 @@ def telegram_xabar_qayta_ishlash(update):
             session_id = f"telegram_{chat_id}"
             if matn == "/start":
                 telegram_yuborish(chat_id, "Salom! Men RAV AI!\nIsmingizni ayting!/yangiliklar - so'nggi xabarlar")
+            elif matn == "/stat":
+                users = users_yuklash()
+                jami_user = len(users)
+                jami_xabar = sum(len(u.get("suhbat", [])) for u in users.values())
+                javob_stat = "RAV AI statistikasi:" + chr(10) + chr(10) + "Jami foydalanuvchilar: " + str(jami_user) + chr(10) + "Jami xabarlar: " + str(jami_xabar)
+                telegram_yuborish(chat_id, javob_stat)
             elif matn == "/yangiliklar":
                 yangiliklar = yangiliklar_olish("world")
                 if yangiliklar:
