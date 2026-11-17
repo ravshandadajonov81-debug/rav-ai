@@ -198,7 +198,7 @@ from zoneinfo import ZoneInfo
 from datetime import datetime
 
 def kerak_mi_vaqt(savol):
-    kalit = ["soat necha", "vaqt qancha", "hozir soat", "time", "nechada", "soat nechada", "saat kac", "saat kac", "necha soat", "soat nech", "skolko vremeni", "what time", "сколько времени", "который час", "саат нечэ"]
+    kalit = ["soat necha", "vaqt qancha", "hozir soat", "time", "nechada", "soat nechada", "saat kac", "saat kac", "necha soat", "soat nech", "skolko vremeni", "what time", "сколько времени", "который час", "саат нечэ", "现在几点", "几点了"]
     return any(k in savol.lower() for k in kalit)
 
 def joy_vaqt_zonasi_topish(joy_nomi):
@@ -216,6 +216,22 @@ def joy_vaqt_zonasi_topish(joy_nomi):
     return None, None
 
 def dunyo_vaqti_olish(savol):
+    xitoy_shaharlar = {
+        "伊斯坦布尔": "Istanbul",
+        "莫斯科": "Moskva",
+        "伦敦": "London",
+        "东京": "Tokyo",
+        "北京": "Beijing",
+        "汤什干": "Tashkent",
+    }
+    for k, v in xitoy_shaharlar.items():
+        if k in savol:
+            zona2, nom2 = joy_vaqt_zonasi_topish(v)
+            if not zona2:
+                zona2 = "Asia/Tashkent"
+                nom2 = v
+            hozir2 = datetime.now(ZoneInfo(zona2))
+            return (nom2 or v).title() + "da hozir soat: " + hozir2.strftime("%H:%M") + " (" + hozir2.strftime("%d.%m.%Y") + ")"
     words = savol.replace('?','').replace('!','').replace('.','').replace(',','').split()
     stop = ["soat","necha","vaqt","qancha","hozir","time","nechada","da","de","ni","ning"]
     joy_nomi = None
@@ -429,6 +445,8 @@ def savol_yuborish(data: SavolModel):
     if kerak_mi_valyuta(data.matn):
         kod = valyuta_kodi_topish(data.matn)
         return {"javob": valyuta_kursi_olish(kod)}
+    if kerak_mi_vaqt(data.matn):
+        return {"javob": dunyo_vaqti_olish(data.matn)}
     if kerak_mi_vaqt(data.matn):
         return {"javob": dunyo_vaqti_olish(data.matn)}
     if kerak_mi_vaqt(data.matn):
