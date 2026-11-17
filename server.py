@@ -37,6 +37,7 @@ def users_saqlash(data):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 def foydalanuvchi_olish(session_id):
+    users = users_yuklash()
     if session_id not in users:
         users[session_id] = {"ism": "", "til": "uz", "suhbat": [], "qiziqishlar": []}
         users_saqlash(users)
