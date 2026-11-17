@@ -153,6 +153,46 @@ def webhook_ornatish():
 threading.Thread(target=keep_alive, daemon=True).start()
 threading.Thread(target=webhook_ornatish, daemon=True).start()
 
+def valyuta_nomlari():
+    return {'dollar': 'USD', 'dollari': 'USD', 'euro': 'EUR', 'yevro': 'EUR', 'rubl': 'RUB', 'funt': 'GBP', 'sterling': 'GBP', 'yen': 'JPY', 'yena': 'JPY', 'yuan': 'CNY', 'lira': 'TRY', 'dirham': 'AED', 'tenge': 'KZT', 'manat': 'AZN', 'som': 'KGS', 'hryvnia': 'UAH', 'rupiya': 'INR', 'von': 'KRW', 'frank': 'CHF', 'real': 'BRL'}
+
+def valyuta_kursi_olish(maqsad=None):
+    try:
+        url = "https://open.er-api.com/v6/latest/USD"
+        r = http_client.get(url, timeout=8)
+        if r.status_code == 200:
+            d = r.json()
+            rates = d.get("rates", {})
+            uzs = rates.get("UZS", 0)
+            if maqsad and maqsad in rates and maqsad != 'UZS':
+                kurs = rates[maqsad]
+                som_narx = round(uzs / kurs)
+                return "1 " + maqsad + " = " + str(som_narx) + " som"
+            eur = rates.get("EUR", 0)
+            rub = rates.get("RUB", 0)
+            natija = "Valyuta kurslari:" + chr(10)
+            natija += chr(10) + "1 Dollar = " + str(round(uzs)) + " som"
+            if eur:
+                natija += chr(10) + "1 Euro = " + str(round(uzs/eur)) + " som"
+            if rub:
+                natija += chr(10) + "1 Rubl = " + str(round(uzs/rub)) + " som"
+            return natija
+    except Exception as e:
+        print("Valyuta xatosi:", e)
+    return "Valyuta malumotini olib bolmadi"
+
+def valyuta_kodi_topish(savol):
+    savol_l = savol.lower()
+    nomlar = valyuta_nomlari()
+    for nom, kod in nomlar.items():
+        if nom in savol_l:
+            return kod
+    return None
+
+def kerak_mi_valyuta(savol):
+    kalit = ["valyuta", "kurs", "dollar", "euro", "rubl", "som narxi", "dollar kursi"]
+    return any(k in savol.lower() for k in kalit)
+
 def shahar_topish(savol):
     savol_lower = savol.lower()
     mamlakatlar = {
@@ -340,6 +380,9 @@ def savol_yuborish(data: SavolModel):
         ob = ob_havo_olish(shahar)
         if ob:
             return {"javob": ob}
+    if kerak_mi_valyuta(data.matn):
+        kod = valyuta_kodi_topish(data.matn)
+        return {"javob": valyuta_kursi_olish(kod)}
     javob = gemini_javob(data.matn, data.session_id)
     return {"javob": javob}
 
