@@ -191,23 +191,27 @@ def valyuta_kodi_topish(savol):
     return None
 
 def kerak_mi_valyuta(savol):
-    kalit = ["soat necha", "vaqt qancha", "hozir soat", "time", "nechada", "soat nechada", "saat kac", "necha soat", "soat nech", "сколько времени", "который час", "саат нечэ", "现在几点", "几点了", "che ore sono", "che ora", "quelle heure", "wie spat", "wie spät", "que hora", "qué hora", "que horas", "hoe laat", "vad är klockan", "hva er klokken", "hvad er klokken", "mita kello on", "τι ώρα είναι", "ile godzina", "kolik je hodin", "kolko je hodin", "向ちあいたい", "什乕時", "گکش", "الساعة", "மணி", "কতা", "श्कितने वाजे", "กี่โมง", "mấy giờ", "pukul berapa", "jam berapa", "cili saat", "saat kaç"]
+    kalit = ["dollar", "euro", "rubl", "valyuta", "kurs", "som", "narxi qancha", "qancha turadi", "valyuta kursi", "dollar kursi", "euro kursi", "exchange rate", "currency", "usd", "eur", "rub"]
     return any(k in savol.lower() for k in kalit)
 
 from zoneinfo import ZoneInfo
 from datetime import datetime
 
 def kerak_mi_vaqt_ai(savol):
-    try:
-        messages = [
-            {"role": "system", "content": "Javob faqat HA yoki YOQ bilan ber. Boshqa hech narsa yozma. Foydalanuvchi matni vaqtni yoki soatni (hozir necha bolganini, biror joyda soat nechaligini) sorayaptimi?"},
-            {"role": "user", "content": savol},
-        ]
-        response = client.chat.completions.create(model="qwen/qwen3.8-27b", messages=messages, max_tokens=10)
-        javob = response.choices[0].message.content.strip().lower()
-        return "ha" in javob
-    except Exception:
-        return False
+    for urinish in range(3):
+        try:
+            messages = [
+                {"role": "system", "content": "Javob faqat HA yoki YOQ bilan ber. Boshqa hech narsa yozma. Foydalanuvchi matni vaqtni yoki soatni (hozir necha bolganini, biror joyda soat nechaligini) sorayaptimi?"},
+                {"role": "user", "content": savol},
+            ]
+            response = client.chat.completions.create(model="qwen/qwen3.8-27b", messages=messages, max_tokens=10)
+            javob = response.choices[0].message.content.strip().lower()
+            return "ha" in javob
+        except Exception:
+            if urinish < 2:
+                time.sleep(1)
+            else:
+                return False
 
 def kerak_mi_vaqt(savol):
     kalit = ["soat necha", "vaqt qancha", "hozir soat", "time", "nechada", "soat nechada", "saat kac", "saat kac", "necha soat", "soat nech", "skolko vremeni", "what time", "сколько времени", "который час", "саат нечэ", "现在几点", "几点了", "che ore sono", "che ora", "quelle heure", "wie spat", "que hora", "que horas", "hoe laat", "ile godzina", "kolik je hodin", "pukul berapa", "jam berapa", "saat kac"]
@@ -228,82 +232,40 @@ def joy_vaqt_zonasi_topish(joy_nomi):
     return None, None
 
 def joy_nomini_ai_topish(savol):
-    try:
-        messages = [
-            {"role": "system", "content": "Foydalanuvchi matnidan faqat shahar yoki davlat nomini ajrat va shuni lotin harflarida yoz (masalan: Istanbul, Rome, New York, Moscow). Agar joy nomi topilmasa, faqat NONE deb yoz. Boshqa hech qanday izoh yozma, faqat shahar nomi yoki NONE."},
-            {"role": "user", "content": savol},
-        ]
-        response = client.chat.completions.create(model="qwen/qwen3.8-27b", messages=messages, max_tokens=20)
-        joy = response.choices[0].message.content.strip()
-        if joy.upper() == "NONE" or len(joy) < 2:
-            return None
-        return joy
-    except Exception:
-        return None
+    for urinish in range(3):
+        try:
+            messages = [
+                {"role": "system", "content": "Sen aniq joy-nomi ajratuvchisan. Vazifang: foydalanuvchi matnida vaqt sorovi qilingan ANIQ shahar yoki davlat nomini topish. Soz hozir, soat, vaqt kabi sozlarga etibor berma, ular joy nomi emas. Faqat haqiqiy geografik joy nomini top. Javobni albatta lotin harflarida yoz, masalan Bangladesh, Istanbul, Tashkent. Agar matnda hech qanday joy nomi bolmasa, faqat NONE deb yoz. Hech qanday izoh yozma, faqat lotin harflarida joy nomi yoki NONE."},
+                {"role": "user", "content": savol},
+            ]
+            response = client.chat.completions.create(model="qwen/qwen3.8-27b", messages=messages, max_tokens=20)
+            joy = response.choices[0].message.content.strip()
+            if joy.upper() == "NONE" or len(joy) < 2:
+                return None
+            return joy
+        except Exception:
+            if urinish < 2:
+                time.sleep(1)
+            else:
+                return None
 
 def dunyo_vaqti_olish(savol):
-    ai_joy = joy_nomini_ai_topish(savol)
-    if ai_joy:
-        zona4, nom4 = joy_vaqt_zonasi_topish(ai_joy)
-        if zona4:
-            hozir4 = datetime.now(ZoneInfo(zona4))
-            return (nom4 or ai_joy).title() + "da hozir soat: " + hozir4.strftime("%H:%M") + " (" + hozir4.strftime("%d.%m.%Y") + ")"
-    davlat_shaharlar = {
-        "america": "New York", "amerika": "New York", "usa": "New York",
-        "russia": "Moskva", "rossiya": "Moskva",
-        "china": "Beijing", "xitoy": "Beijing",
-        "germany": "Berlin", "germaniya": "Berlin",
-        "france": "Paris", "fransiya": "Paris",
-        "italy": "Rome", "italiya": "Rome",
-        "uk": "London", "angliya": "London", "britaniya": "London",
-        "spain": "Madrid", "ispaniya": "Madrid",
-        "japan": "Tokyo", "yaponiya": "Tokyo",
-    }
-    for k, v in davlat_shaharlar.items():
-        if k in savol.lower():
-            zona3, nom3 = joy_vaqt_zonasi_topish(v)
-            if not zona3:
-                zona3 = "Asia/Tashkent"
-                nom3 = v
-            hozir3 = datetime.now(ZoneInfo(zona3))
-            return (nom3 or v).title() + "da hozir soat: " + hozir3.strftime("%H:%M") + " (" + hozir3.strftime("%d.%m.%Y") + ")"
-    xitoy_shaharlar = {
-        "伊斯坦布尔": "Istanbul",
-        "莫斯科": "Moskva",
-        "伦敦": "London",
-        "东京": "Tokyo",
-        "北京": "Beijing",
-        "汤什干": "Tashkent",
-    }
-    for k, v in xitoy_shaharlar.items():
-        if k in savol:
-            zona2, nom2 = joy_vaqt_zonasi_topish(v)
-            if not zona2:
-                zona2 = "Asia/Tashkent"
-                nom2 = v
-            hozir2 = datetime.now(ZoneInfo(zona2))
-            return (nom2 or v).title() + "da hozir soat: " + hozir2.strftime("%H:%M") + " (" + hozir2.strftime("%d.%m.%Y") + ")"
-    words = savol.replace('?','').replace('!','').replace('.','').replace(',','').split()
-    stop = ["soat","necha","vaqt","qancha","hozir","time","nechada","da","de","ni","ning"]
-    joy_nomi = None
-    for w in reversed(words):
-        if w.lower() not in stop and len(w) > 2:
-            joy_nomi = w
-            for end in ['da','de','ni','ga','dan']:
-                if joy_nomi.lower().endswith(end) and len(joy_nomi) > len(end)+2:
-                    joy_nomi = joy_nomi[:-len(end)]
-                    break
+    ai_joy = None
+    for urinish in range(6):
+        ai_joy = joy_nomini_ai_topish(savol)
+        if ai_joy:
             break
-    if not joy_nomi:
-        joy_nomi = "Tashkent"
-    zona, topilgan_nom = joy_vaqt_zonasi_topish(joy_nomi)
+        time.sleep(1)
+    if not ai_joy:
+        ai_joy = "Tashkent"
+    zona, nom = joy_vaqt_zonasi_topish(ai_joy)
     if not zona:
         zona = "Asia/Tashkent"
-        topilgan_nom = joy_nomi
+        nom = ai_joy
     try:
         hozir = datetime.now(ZoneInfo(zona))
-        return (topilgan_nom or joy_nomi).title() + "da hozir soat: " + hozir.strftime("%H:%M") + " (" + hozir.strftime("%d.%m.%Y") + ")"
-    except Exception as e:
+        return (nom or ai_joy).title() + " hozir soat: " + hozir.strftime("%H:%M") + " (" + hozir.strftime("%d.%m.%Y") + ")"
+    except Exception:
         return "Vaqtni aniqlab bolmadi"
 
 def shahar_topish(savol):
@@ -479,6 +441,22 @@ async def telegram_webhook(request: Request):
         print("Webhook xato:", e)
     return {"ok": True}
 
+def javobni_tarjima_qil(javob_matni, asl_savol):
+    for urinish in range(3):
+        try:
+            messages = [
+                {"role": "system", "content": "Foydalanuvchi savolining aniq qaysi tilda va qaysi alifboda yozilganini aniqla. Keyin berilgan MATNNI (vaqt yoki valyuta natijasi) aynan osha tilga va osha alifboga tarjima qil. Diqqat: savolni emas, faqat berilgan MATNNI tarjima qil va qaytar. Agar savol xitoy tilida bolsa javob ham xitoy tilida ieroglif bilan bolishi kerak. Faqat tarjima qilingan natija matnini yoz, hech qanday izoh yozma, savolni takrorlama."},
+                {"role": "user", "content": "Savol tili aniqlanadigan matn: " + asl_savol + chr(10) + "Tarjima qilinishi kerak bolgan natija: " + javob_matni},
+            ]
+            response = client.chat.completions.create(model="qwen/qwen3.8-27b", messages=messages, max_tokens=300)
+            natija = response.choices[0].message.content.strip()
+            if natija and natija != asl_savol.strip():
+                return natija
+        except Exception:
+            pass
+        time.sleep(1)
+    return javob_matni
+
 @app.post("/savol")
 def savol_yuborish(data: SavolModel):
     if kerak_mi_yangilik(data.matn):
@@ -492,14 +470,14 @@ def savol_yuborish(data: SavolModel):
         shahar = shahar_topish(data.matn)
         ob = ob_havo_olish(shahar)
         if ob:
-            return {"javob": ob}
+            return {"javob": javobni_tarjima_qil(ob, data.matn)}
     if kerak_mi_valyuta(data.matn):
         kod = valyuta_kodi_topish(data.matn)
-        return {"javob": valyuta_kursi_olish(kod)}
-    if kerak_mi_vaqt(data.matn):
-        return {"javob": dunyo_vaqti_olish(data.matn)}
-    if kerak_mi_vaqt_ai(data.matn):
-        return {"javob": dunyo_vaqti_olish(data.matn)}
+        natija = valyuta_kursi_olish(kod)
+        return {"javob": javobni_tarjima_qil(natija, data.matn)}
+    if kerak_mi_vaqt(data.matn) or kerak_mi_vaqt_ai(data.matn):
+        natija = dunyo_vaqti_olish(data.matn)
+        return {"javob": javobni_tarjima_qil(natija, data.matn)}
     if kerak_mi_vaqt(data.matn):
         return {"javob": dunyo_vaqti_olish(data.matn)}
     if kerak_mi_vaqt(data.matn):
