@@ -44,6 +44,7 @@ def foydalanuvchi_olish(session_id):
     return users[session_id]
 
 def foydalanuvchi_yangilash(session_id, data):
+    users = users_yuklash()
     users[session_id] = data
     users_saqlash(users)
 
@@ -192,6 +193,51 @@ def valyuta_kodi_topish(savol):
 def kerak_mi_valyuta(savol):
     kalit = ["valyuta", "kurs", "dollar", "euro", "rubl", "som narxi", "dollar kursi"]
     return any(k in savol.lower() for k in kalit)
+
+from zoneinfo import ZoneInfo
+from datetime import datetime
+
+def kerak_mi_vaqt(savol):
+    kalit = ["soat necha", "vaqt qancha", "hozir soat", "time", "nechada", "soat nechada", "saat kac", "saat kac", "necha soat", "soat nech", "skolko vremeni", "what time", "сколько времени", "который час", "саат нечэ"]
+    return any(k in savol.lower() for k in kalit)
+
+def joy_vaqt_zonasi_topish(joy_nomi):
+    try:
+        url = "https://geocoding-api.open-meteo.com/v1/search"
+        r = http_client.get(url, params={"name": joy_nomi, "count": 1}, timeout=8)
+        if r.status_code == 200:
+            d = r.json()
+            natija = d.get("results")
+            if natija:
+                joy = natija[0]
+                return joy.get("timezone"), joy.get("name")
+    except Exception as e:
+        print("Geocoding xatosi:", e)
+    return None, None
+
+def dunyo_vaqti_olish(savol):
+    words = savol.replace('?','').replace('!','').replace('.','').replace(',','').split()
+    stop = ["soat","necha","vaqt","qancha","hozir","time","nechada","da","de","ni","ning"]
+    joy_nomi = None
+    for w in reversed(words):
+        if w.lower() not in stop and len(w) > 2:
+            joy_nomi = w
+            for end in ['da','de','ni','ga','dan']:
+                if joy_nomi.lower().endswith(end) and len(joy_nomi) > len(end)+2:
+                    joy_nomi = joy_nomi[:-len(end)]
+                    break
+            break
+    if not joy_nomi:
+        joy_nomi = "Tashkent"
+    zona, topilgan_nom = joy_vaqt_zonasi_topish(joy_nomi)
+    if not zona:
+        zona = "Asia/Tashkent"
+        topilgan_nom = joy_nomi
+    try:
+        hozir = datetime.now(ZoneInfo(zona))
+        return (topilgan_nom or joy_nomi).title() + "da hozir soat: " + hozir.strftime("%H:%M") + " (" + hozir.strftime("%d.%m.%Y") + ")"
+    except Exception as e:
+        return "Vaqtni aniqlab bolmadi"
 
 def shahar_topish(savol):
     savol_lower = savol.lower()
@@ -383,6 +429,10 @@ def savol_yuborish(data: SavolModel):
     if kerak_mi_valyuta(data.matn):
         kod = valyuta_kodi_topish(data.matn)
         return {"javob": valyuta_kursi_olish(kod)}
+    if kerak_mi_vaqt(data.matn):
+        return {"javob": dunyo_vaqti_olish(data.matn)}
+    if kerak_mi_vaqt(data.matn):
+        return {"javob": dunyo_vaqti_olish(data.matn)}
     javob = gemini_javob(data.matn, data.session_id)
     return {"javob": javob}
 

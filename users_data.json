@@ -183,5 +183,62 @@
     "til": "uz",
     "suhbat": [],
     "qiziqishlar": []
+  },
+  "user_uh2buyhkd": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [],
+    "qiziqishlar": []
+  },
+  "test3": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [],
+    "qiziqishlar": []
+  },
+  "test4": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [],
+    "qiziqishlar": []
+  },
+  "test5": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [],
+    "qiziqishlar": []
+  },
+  "yangi_test_123": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [],
+    "qiziqishlar": []
+  },
+  "debug_test": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [],
+    "qiziqishlar": []
+  },
+  "tozasession001": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [],
+    "qiziqishlar": []
+  },
+  "test_tuzatish_1": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [
+      {
+        "role": "user",
+        "content": "Saat kac Istanbulda"
+      },
+      {
+        "role": "assistant",
+        "content": "Men real vaqt (actual time) ma'lumotlari ro'yxatidan foydalanmayman, shuning uchun hozirgi aniq soatni sizga aytib bera olmayman. Ayni damdagi soatni bilish uchun iltimos, qurilmangizdagi soat yoki interga qarang."
+      }
+    ],
+    "qiziqishlar": []
   }
 }
