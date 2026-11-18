@@ -522,6 +522,36 @@ def mymemory_til_kodi_topish(til_kodi):
             return kod
     return til_kodi
 
+OB_HAVO_LABELLAR = ["Harorat:", "his:", "Namlik:", "Shamol:", "Holat:", "3 kunlik:", "Bugun:", "Ertaga:", "Indinga:"]
+
+def ob_havo_tarjima_qil(matn, til_kodi):
+    try:
+        tarjima_kesh = {}
+        natija = matn
+        for label in OB_HAVO_LABELLAR:
+            if label in natija:
+                if label not in tarjima_kesh:
+                    t = deep_tarjima_qil(label, til_kodi)
+                    tarjima_kesh[label] = t if t else label
+                natija = natija.replace(label, tarjima_kesh[label])
+        return natija
+    except Exception as e:
+        print("Ob-havo tarjima xatosi:", e)
+        return None
+
+def ob_havo_toliq_tarjima_qil(matn, til_kodi):
+    try:
+        natija = deep_tarjima_qil(matn, til_kodi)
+        if not natija:
+            return matn
+        qolgan_ozbekcha = ["Bugun:", "Ertaga:", "Indinga:", "kunlik"]
+        if any(s in natija for s in qolgan_ozbekcha):
+            natija = ob_havo_tarjima_qil(natija, til_kodi)
+        return natija
+    except Exception as e:
+        print("Ob-havo toliq tarjima xatosi:", e)
+        return matn
+
 def deep_tarjima_qil(matn, til_kodi):
     try:
         from deep_translator import MyMemoryTranslator
@@ -556,7 +586,22 @@ def savol_yuborish(data: SavolModel):
         if yangiliklar:
             javob = "So'nggi yangiliklar:\n" + "\n".join([f"{i+1}. {y}" for i, y in enumerate(yangiliklar)])
             return {"javob": javob}
-    kalit_ob = ["ob-havo", "ob havo", "havo", "weather", "harorat", "iqlim", "temps", "wetter", "clima", "tempo", "погода", "havo-iqlim", "天气", "mausam", "thoi tiet"]
+    kalit_ob = [
+        "ob-havo", "ob havo", "havo", "weather", "harorat", "iqlim", "temps", "wetter",
+        "clima", "tempo", "погода", "havo-iqlim", "天气", "mausam", "thoi tiet",
+        "الطقس", "طقس", "درجة الحرارة",
+        "hava durumu", "sicaklik",
+        "temperature", "forecast",
+        "pogoda", "pogoda dzis",
+        "havo", "obhavo",
+        "sydd", "veder",
+        "weer", "vreme", "vrijeme", "sää", "veir", "vejr", "vader",
+        "tiempo", "que tiempo hace",
+        "날씨",
+        "thoi tiet hom nay",
+        "ilm", "eira",
+        "moyin havo", "havo rayi",
+    ]
     if any(s in data.matn.lower() for s in kalit_ob):
         shahar_ob = None
         for urinish_ob in range(4):
@@ -569,7 +614,7 @@ def savol_yuborish(data: SavolModel):
         ob = ob_havo_olish(shahar_ob)
         if ob:
             til_ob = tilni_ai_aniqlash(data.matn)
-            tarjima_ob = deep_tarjima_qil(ob, til_ob)
+            tarjima_ob = ob_havo_toliq_tarjima_qil(ob, til_ob)
             if tarjima_ob:
                 return {"javob": tarjima_ob}
             return {"javob": javobni_tarjima_qil(ob, data.matn)}
