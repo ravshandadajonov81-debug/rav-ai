@@ -191,7 +191,7 @@ def valyuta_kodi_topish(savol):
     return None
 
 def kerak_mi_valyuta(savol):
-    kalit = ["dollar", "euro", "rubl", "valyuta", "kurs", "som", "narxi qancha", "qancha turadi", "valyuta kursi", "dollar kursi", "euro kursi", "exchange rate", "currency", "usd", "eur", "rub"]
+    kalit = ["dollar", "euro", "rubl", "valyuta", "kurs", "som", "narxi qancha", "qancha turadi", "valyuta kursi", "dollar kursi", "euro kursi", "exchange rate", "currency"]
     return any(k in savol.lower() for k in kalit)
 
 from zoneinfo import ZoneInfo
