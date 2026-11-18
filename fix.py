@@ -3,29 +3,27 @@ import io
 with io.open("server.py", "r", encoding="utf-8") as f:
     content = f.read()
 
-old = '''    if kerak_mi_vaqt(data.matn) or kerak_mi_vaqt_ai(data.matn):
-        natija = dunyo_vaqti_olish(data.matn)
-        return {"javob": javobni_tarjima_qil(natija, data.matn)}'''
+q = chr(34)
+old_line = "return {'+chr(34)+'javob'+chr(34)+': javobni_tarjima_qil('+chr(34)+'Iltimos shahar nomini aniqroq korsating.'+chr(34)+', data.matn)}"
+new_line = "return {" + q + "javob" + q + ": javobni_tarjima_qil(" + q + "Iltimos shahar nomini aniqroq korsating." + q + ", data.matn)}"
 
-new = '''    if kerak_mi_vaqt(data.matn) or kerak_mi_vaqt_ai(data.matn):
-        ai_joy2 = None
-        for urinish2 in range(6):
-            ai_joy2 = joy_nomini_ai_topish(data.matn)
-            if ai_joy2:
-                break
-            time.sleep(1)
-        if not ai_joy2:
-            ai_joy2 = "Tashkent"
-        babel_natija = babel_bilan_vaqt_olish(ai_joy2, "uz")
-        if babel_natija:
-            return {"javob": javobni_tarjima_qil(babel_natija, data.matn)}
-        natija = dunyo_vaqti_olish(data.matn)
-        return {"javob": javobni_tarjima_qil(natija, data.matn)}'''
+old_line2 = "return {'+chr(34)+'javob'+chr(34)+': natija}"
+new_line2 = "return {" + q + "javob" + q + ": natija}"
 
-if old in content:
-    content = content.replace(old, new, 1)
-    with io.open("server.py", "w", encoding="utf-8") as f:
-        f.write(content)
-    print("Tuzatildi!")
-else:
-    print("Topilmadi")
+old_line3 = "return {'+chr(34)+'javob'+chr(34)+': javobni_tarjima_qil(eski_natija, data.matn)}"
+new_line3 = "return {" + q + "javob" + q + ": javobni_tarjima_qil(eski_natija, data.matn)}"
+
+count = 0
+if old_line in content:
+    content = content.replace(old_line, new_line, 1)
+    count += 1
+if old_line2 in content:
+    content = content.replace(old_line2, new_line2, 1)
+    count += 1
+if old_line3 in content:
+    content = content.replace(old_line3, new_line3, 1)
+    count += 1
+
+with io.open("server.py", "w", encoding="utf-8") as f:
+    f.write(content)
+print("Tuzatildi! " + str(count) + " ta qator almashtirildi.")

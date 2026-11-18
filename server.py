@@ -204,7 +204,7 @@ def kerak_mi_vaqt_ai(savol):
                 {"role": "system", "content": "Javob faqat HA yoki YOQ bilan ber. Boshqa hech narsa yozma. Foydalanuvchi matni vaqtni yoki soatni (hozir necha bolganini, biror joyda soat nechaligini) sorayaptimi?"},
                 {"role": "user", "content": savol},
             ]
-            response = client.chat.completions.create(model="qwen/qwen3.8-27b", messages=messages, max_tokens=10)
+            response = client.chat.completions.create(model="qwen/qwen3.8-27b", messages=messages, max_tokens=200)
             javob = response.choices[0].message.content.strip().lower()
             return "ha" in javob
         except Exception:
@@ -238,7 +238,7 @@ def joy_nomini_ai_topish(savol):
                 {"role": "system", "content": "Sen aniq joy-nomi ajratuvchisan. Vazifang: foydalanuvchi matnida vaqt sorovi qilingan ANIQ shahar yoki davlat nomini topish. Soz hozir, soat, vaqt kabi sozlarga etibor berma, ular joy nomi emas. Faqat haqiqiy geografik joy nomini top. Javobni albatta lotin harflarida yoz, masalan Bangladesh, Istanbul, Tashkent. Agar matnda hech qanday joy nomi bolmasa, faqat NONE deb yoz. Hech qanday izoh yozma, faqat lotin harflarida joy nomi yoki NONE."},
                 {"role": "user", "content": savol},
             ]
-            response = client.chat.completions.create(model="qwen/qwen3.8-27b", messages=messages, max_tokens=20)
+            response = client.chat.completions.create(model="qwen/qwen3.8-27b", messages=messages, max_tokens=200)
             joy = response.choices[0].message.content.strip()
             if joy.upper() == "NONE" or len(joy) < 2:
                 return None
@@ -248,6 +248,51 @@ def joy_nomini_ai_topish(savol):
                 time.sleep(1)
             else:
                 return None
+
+LANGUAGES = {"uz": "uz_UZ", "en": "en_US", "ru": "ru_RU", "fr": "fr_FR", "it": "it_IT", "de": "de_DE", "es": "es_ES", "tr": "tr_TR", "ar": "ar", "zh": "zh_CN", "ja": "ja_JP", "ko": "ko_KR", "pt": "pt_PT", "hi": "hi_IN", "uk": "uk_UA", "pl": "pl_PL", "nl": "nl_NL", "sv": "sv_SE", "fa": "fa_IR", "id": "id_ID", "tg": "tg_TJ", "bn": "bn_BD", "th": "th_TH", "vi": "vi_VN", "el": "el_GR", "he": "he_IL", "ro": "ro_RO", "cs": "cs_CZ", "da": "da_DK", "fi": "fi_FI", "no": "nb_NO", "hu": "hu_HU", "sr": "sr_RS", "hr": "hr_HR", "bg": "bg_BG", "sk": "sk_SK", "sl": "sl_SI", "ms": "ms_MY", "ta": "ta_IN", "ur": "ur_PK", "sw": "sw_KE"}
+
+def babel_bilan_vaqt_olish(joy_nomi, til_kodi="uz"):
+    try:
+        from geopy.geocoders import Nominatim
+        from timezonefinder import TimezoneFinder
+        from babel.dates import format_datetime
+        geolocator = Nominatim(user_agent="RAV_AI_World_Time")
+        location = geolocator.geocode(joy_nomi, timeout=10)
+        if location is None:
+            return None
+        tf = TimezoneFinder()
+        timezone_name = tf.timezone_at(lng=location.longitude, lat=location.latitude)
+        if timezone_name is None:
+            return None
+        city_time = datetime.now(ZoneInfo(timezone_name))
+        locale = LANGUAGES.get(til_kodi.split("-")[0].lower(), "en_US")
+        try:
+            vaqt_matni = format_datetime(city_time, "d MMMM y, HH:mm", locale=locale)
+        except Exception:
+            vaqt_matni = city_time.strftime("%d.%m.%Y %H:%M")
+        shahar_nomi = location.address.split(",")[0]
+        return shahar_nomi + ": " + vaqt_matni
+    except Exception as e:
+        print("Babel vaqt xatosi:", e)
+        return None
+
+def tilni_ai_aniqlash(savol):
+    try:
+        messages = [
+            {"role": "system", "content": "Foydalanuvchi matnining qaysi tilda yozilganini aniqla. Javobni faqat ISO 639-1 ikki harfli til kodi korinishida yoz (masalan: uz, en, ru, it, zh, tg, fr, de). Hech qanday izoh, nuqta yoki qoshimcha soz yozma, faqat ikki harfli kodni yoz."},
+            {"role": "user", "content": savol},
+        ]
+        response = client.chat.completions.create(model="openai/gpt-oss-120b", messages=messages, max_tokens=200)
+        javob = response.choices[0].message.content.strip().lower()
+        for harf in javob:
+            pass
+        import re
+        topilgan = re.findall(r"[a-z]{2}", javob)
+        if topilgan:
+            return topilgan[0]
+        return "en"
+    except Exception:
+        return "en"
 
 def dunyo_vaqti_olish(savol):
     ai_joy = None
@@ -476,12 +521,20 @@ def savol_yuborish(data: SavolModel):
         natija = valyuta_kursi_olish(kod)
         return {"javob": javobni_tarjima_qil(natija, data.matn)}
     if kerak_mi_vaqt(data.matn) or kerak_mi_vaqt_ai(data.matn):
-        natija = dunyo_vaqti_olish(data.matn)
-        return {"javob": javobni_tarjima_qil(natija, data.matn)}
-    if kerak_mi_vaqt(data.matn):
-        return {"javob": dunyo_vaqti_olish(data.matn)}
-    if kerak_mi_vaqt(data.matn):
-        return {"javob": dunyo_vaqti_olish(data.matn)}
+        til = tilni_ai_aniqlash(data.matn)
+        shahar = None
+        for urinish3 in range(6):
+            shahar = joy_nomini_ai_topish(data.matn)
+            if shahar:
+                break
+            time.sleep(1)
+        if not shahar:
+            return {"javob": javobni_tarjima_qil("Iltimos shahar nomini aniqroq korsating.", data.matn)}
+        natija = babel_bilan_vaqt_olish(shahar, til)
+        if natija:
+            return {"javob": natija}
+        eski_natija = dunyo_vaqti_olish(data.matn)
+        return {"javob": javobni_tarjima_qil(eski_natija, data.matn)}
     javob = gemini_javob(data.matn, data.session_id)
     return {"javob": javob}
 
