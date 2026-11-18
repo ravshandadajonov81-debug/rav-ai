@@ -5,3 +5,7 @@ python-dotenv
 httpx
 duckduckgo-search
 tzdata
+
+geopy
+timezonefinder
+Babel

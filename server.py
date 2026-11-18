@@ -97,7 +97,7 @@ def keep_alive():
             http_client.get("https://rav-ai.onrender.com", timeout=10)
             print("Keep alive!")
         except Exception:
-            pass
+            pass 
 
 def telegram_yuborish(chat_id, matn):
     try:
@@ -136,8 +136,8 @@ def telegram_xabar_qayta_ishlash(update):
                     javob = "Yangiliklar yuklanmadi."
                 telegram_yuborish(chat_id, javob)
             else:
-                javob = gemini_javob(matn, session_id)
-                telegram_yuborish(chat_id, javob)
+                natija = savol_yuborish(SavolModel(matn=matn, session_id=session_id))
+                telegram_yuborish(chat_id, natija.get("javob", "Javob tayyorlanmadi."))
     except Exception as e:
         print("Xabar xatosi:", e)
 
@@ -197,6 +197,37 @@ def kerak_mi_valyuta(savol):
 from zoneinfo import ZoneInfo
 from datetime import datetime
 
+def tilni_ai_aniqlash(savol):
+    """Foydalanuvchi yozgan tilning ISO kodini aniqlaydi."""
+    try:
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    "Detect the language of the user's message. "
+                    "Return ONLY its ISO 639-1 language code. "
+                    "Examples: Uzbek=uz, English=en, Russian=ru, "
+                    "French=fr, Italian=it, Tajik=tg, Chinese=zh, "
+                    "Japanese=ja. Never translate the message."
+                ),
+            },
+            {"role": "user", "content": savol},
+        ]
+        response = client.chat.completions.create(
+            model="openai/gpt-oss-120b",
+            messages=messages,
+            max_tokens=10,
+        )
+        kod = response.choices[0].message.content.strip().lower()
+        kod = kod.replace("-", "_").split("_")[0]
+        if len(kod) == 2 and kod.isalpha():
+            return kod
+        return "en"
+    except Exception as e:
+        print("Til aniqlash xatosi:", e)
+        return "en"
+
+
 def kerak_mi_vaqt_ai(savol):
     for urinish in range(3):
         try:
@@ -204,7 +235,7 @@ def kerak_mi_vaqt_ai(savol):
                 {"role": "system", "content": "Javob faqat HA yoki YOQ bilan ber. Boshqa hech narsa yozma. Foydalanuvchi matni vaqtni yoki soatni (hozir necha bolganini, biror joyda soat nechaligini) sorayaptimi?"},
                 {"role": "user", "content": savol},
             ]
-            response = client.chat.completions.create(model="qwen/qwen3.8-27b", messages=messages, max_tokens=10)
+            response = client.chat.completions.create(model="openai/gpt-oss-120b", messages=messages, max_tokens=10)
             javob = response.choices[0].message.content.strip().lower()
             return "ha" in javob
         except Exception:
@@ -238,16 +269,64 @@ def joy_nomini_ai_topish(savol):
                 {"role": "system", "content": "Sen aniq joy-nomi ajratuvchisan. Vazifang: foydalanuvchi matnida vaqt sorovi qilingan ANIQ shahar yoki davlat nomini topish. Soz hozir, soat, vaqt kabi sozlarga etibor berma, ular joy nomi emas. Faqat haqiqiy geografik joy nomini top. Javobni albatta lotin harflarida yoz, masalan Bangladesh, Istanbul, Tashkent. Agar matnda hech qanday joy nomi bolmasa, faqat NONE deb yoz. Hech qanday izoh yozma, faqat lotin harflarida joy nomi yoki NONE."},
                 {"role": "user", "content": savol},
             ]
-            response = client.chat.completions.create(model="qwen/qwen3.8-27b", messages=messages, max_tokens=20)
+            response = client.chat.completions.create(model="openai/gpt-oss-120b", messages=messages, max_tokens=20)
             joy = response.choices[0].message.content.strip()
             if joy.upper() == "NONE" or len(joy) < 2:
                 return None
+            if joy.lower() in ["romania", "românia"] and "romania" not in savol.lower() and "românia" not in savol.lower():
+                joy = "Roma"
             return joy
         except Exception:
             if urinish < 2:
                 time.sleep(1)
             else:
                 return None
+
+LANGUAGES = {
+    "uz": "uz_UZ", "en": "en_US", "ru": "ru_RU",
+    "fr": "fr_FR", "it": "it_IT", "de": "de_DE",
+    "es": "es_ES", "tr": "tr_TR", "ar": "ar",
+    "zh": "zh_CN", "ja": "ja_JP", "ko": "ko_KR",
+    "pt": "pt_PT", "hi": "hi_IN", "uk": "uk_UA",
+    "pl": "pl_PL", "nl": "nl_NL", "sv": "sv_SE",
+    "fa": "fa_IR", "id": "id_ID", "tg": "tg_TJ",
+    "bn": "bn_BD", "th": "th_TH", "vi": "vi_VN",
+    "el": "el_GR", "he": "he_IL", "ro": "ro_RO",
+    "cs": "cs_CZ", "da": "da_DK", "fi": "fi_FI",
+    "no": "nb_NO", "hu": "hu_HU", "sr": "sr_RS",
+    "hr": "hr_HR", "bg": "bg_BG", "sk": "sk_SK",
+    "sl": "sl_SI", "ms": "ms_MY", "ta": "ta_IN",
+    "ur": "ur_PK", "sw": "sw_KE",
+}
+
+def babel_bilan_vaqt_olish(joy_nomi, til_kodi="uz"):
+    """Shahar vaqtini aniqlab, sanani foydalanuvchi tilida formatlaydi."""
+    try:
+        from babel.dates import format_datetime
+
+        zona, aniqlangan_nomi = joy_vaqt_zonasi_topish(joy_nomi)
+        if not zona:
+            return None
+
+        hozir = datetime.now(ZoneInfo(zona))
+        til = til_kodi.split("-")[0].lower()
+        locale = LANGUAGES.get(til, "en_US")
+
+        try:
+            vaqt = format_datetime(
+                hozir,
+                "EEEE, d MMMM y, HH:mm:ss",
+                locale=locale,
+            )
+        except Exception:
+            vaqt = hozir.strftime("%d.%m.%Y %H:%M:%S")
+
+        shahar = aniqlangan_nomi or joy_nomi
+        return f"{shahar}: {vaqt}"
+
+    except Exception as e:
+        print("Babel vaqt xatosi:", e)
+        return None
 
 def dunyo_vaqti_olish(savol):
     ai_joy = None
@@ -323,90 +402,14 @@ def shahar_topish(savol):
             return shahar.title()
     return "Tashkent"
 
-def ob_havo_olish(shahar):
-    try:
-        url = "https://wttr.in/" + shahar.replace(" ", "+") + "?format=j1"
-        r = http_client.get(url, timeout=8)
-        if r.status_code == 200:
-            d = r.json()
-            cur = d["current_condition"][0]
-            harorat = cur["temp_C"]
-            his = cur["FeelsLikeC"]
-            namlik = cur["humidity"]
-            shamol = cur["windspeedKmph"]
-            tavsif = cur["weatherDesc"][0]["value"]
-            weather3 = d["weather"]
-            prognoz = ""
-            kunlar = ["Bugun", "Ertaga", "Indinga"]
-            for i, w in enumerate(weather3[:3]):
-                min_t = w["mintempC"]
-                max_t = w["maxtempC"]
-                tavsif3 = w["hourly"][4]["weatherDesc"][0]["value"]
-                prognoz += f"{kunlar[i]}: {min_t}C ~ {max_t}C, {tavsif3}\n"
-            return f"{shahar} ob-havosi:\nHarorat: {harorat}C (his: {his}C)Namlik: {namlik}%\nShamol: {shamol} km/hHolat: {tavsif}\n3 kunlik:\n{prognoz}"
-    except Exception as e:
-        print("Ob-havo xatosi:", e)
-    try:
-        url = "https://wttr.in/" + shahar.replace(" ", "+") + "?format=3"
-        r = http_client.get(url, timeout=5)
-        if r.status_code == 200:
-            return "Ob-havo: " + r.text
-    except:
-        pass
-    return ""
-
-def internet_qidirish(savol):
-    natija = ""
-    if kerak_mi_yangilik(savol):
-        mavzu = yangilik_mavzusi(savol)
-        yangiliklar = yangiliklar_olish(mavzu)
-        if yangiliklar:
-            natija += "Yangiliklar:" + "".join([f"{i+1}. {y[:80]}" for i, y in enumerate(yangiliklar[:3])])
-    kalit_sozlar = ["hozir", "bugun", "ob-havo", "ob havo", "weather", "harorat", "iqlim"]
-    if any(soz in savol.lower() for soz in kalit_sozlar):
-        try:
-            shahar = shahar_topish(savol)
-            url = "https://wttr.in/" + shahar + "?format=3"
-            r = http_client.get(url, timeout=5)
-            if r.status_code == 200:
-                natija += "Ob-havo: " + r.text
-        except Exception as e:
-            print("Ob-havo xatosi:", e)
-    return natija
-
-def gemini_javob(savol, session_id="default"):
-    user = foydalanuvchi_olish(session_id)
-    internet_malumot = internet_qidirish(savol)
-    user["suhbat"].append({"role": "user", "content": savol})
-    if len(user["suhbat"]) > 20:
-        user["suhbat"] = user["suhbat"][-20:]
-    system = "Sen RAV AI degan eng aqlli shaxsiy assistantsan. Foydalanuvchi qaysi tilda yozsa, osha tilda javob ber. Suhbat tarixini eslab qol. Foydalanuvchi ismini aytsa eslab qol."
-    if user["ism"]:
-        system += f" Foydalanuvchi ismi: {user['ism']}."
-    if internet_malumot:
-        system += "\nInternet malumotlari:\n" + internet_malumot
-    messages = [{"role": "system", "content": system}] + user["suhbat"]
-    for urinish in range(3):
-        try:
-            response = client.chat.completions.create(
-                model="qwen/qwen3.8-27b",
-                messages=messages,
-                max_tokens=2048,
-            )
-            javob = response.choices[0].message.content
-            user["suhbat"].append({"role": "assistant", "content": javob})
-            if not user["ism"] and "ismim" in savol.lower():
-                words = savol.split()
-                for i, w in enumerate(words):
-                    if w.lower() in ["ismim", "ismim:"]:
-                        if i + 1 < len(words):
-                            user["ism"] = words[i + 1].strip(".,!")
-            foydalanuvchi_yangilash(session_id, user)
-            return javob
-        except Exception:
-            if urinish < 2:
-                time.sleep(2)
-            else:
+if i + 1 < len(words):
+    user["ism"] = words[i + 1].strip(".,!")
+    foydalanuvchi_yangilash(session_id, user)
+    return javob
+except Exception:
+    if urinish < 2:
+        time.sleep(2)
+        else:
                 return "Hozir server band. Biroz kutib qayta yuboring!"
 
 def rasm_prompt_tayyorla(matn):
@@ -445,10 +448,10 @@ def javobni_tarjima_qil(javob_matni, asl_savol):
     for urinish in range(3):
         try:
             messages = [
-                {"role": "system", "content": "Foydalanuvchi savolining aniq qaysi tilda va qaysi alifboda yozilganini aniqla. Keyin berilgan MATNNI (vaqt yoki valyuta natijasi) aynan osha tilga va osha alifboga tarjima qil. Diqqat: savolni emas, faqat berilgan MATNNI tarjima qil va qaytar. Agar savol xitoy tilida bolsa javob ham xitoy tilida ieroglif bilan bolishi kerak. Faqat tarjima qilingan natija matnini yoz, hech qanday izoh yozma, savolni takrorlama."},
+                {"role": "system", "content": "Foydalanuvchi savolining aniq qaysi tilda va qaysi alifboda yozilganini aniqla. Keyin berilgan MATNNI (vaqt yoki valyuta natijasi) aynan osha tilga va osha alifboga tarjima qil. Diqqat: savolni emas, faqat berilgan MATNNI tarjima qil va qaytar. MUHIM: shahar, davlat va joy nomlarini ASLO ozgartirma yoki boshqa joy nomiga almashtirma - ularni aynan shunday saqlab qol, faqat harflarni kerakli alifboga translit qil (masalan Roma lotin alifbosida Roma yoki kerakli tilda Rim bolib qolishi mumkin, lekin uni Romania kabi boshqa davlat nomiga aslo ozgartirma). Agar savol xitoy tilida bolsa javob ham xitoy tilida ieroglif bilan bolishi kerak. Faqat tarjima qilingan natija matnini yoz, hech qanday izoh yozma, savolni takrorlama."},
                 {"role": "user", "content": "Savol tili aniqlanadigan matn: " + asl_savol + chr(10) + "Tarjima qilinishi kerak bolgan natija: " + javob_matni},
             ]
-            response = client.chat.completions.create(model="qwen/qwen3.8-27b", messages=messages, max_tokens=300)
+            response = client.chat.completions.create(model="openai/gpt-oss-120b", messages=messages, max_tokens=300)
             natija = response.choices[0].message.content.strip()
             if natija and natija != asl_savol.strip():
                 return natija
@@ -463,25 +466,40 @@ def savol_yuborish(data: SavolModel):
         mavzu = yangilik_mavzusi(data.matn)
         yangiliklar = yangiliklar_olish(mavzu)
         if yangiliklar:
-            javob = "So'nggi yangiliklar:\n" + "\n".join([f"{i+1}. {y}" for i, y in enumerate(yangiliklar)])
+            javob = "So'nggi yangiliklar:\\n" + "\\n".join(
+                [f"{i+1}. {y}" for i, y in enumerate(yangiliklar)]
+            )
             return {"javob": javob}
+
     kalit_ob = ["ob-havo", "ob havo", "havo", "weather", "harorat", "iqlim"]
     if any(s in data.matn.lower() for s in kalit_ob):
         shahar = shahar_topish(data.matn)
         ob = ob_havo_olish(shahar)
         if ob:
             return {"javob": javobni_tarjima_qil(ob, data.matn)}
+
     if kerak_mi_valyuta(data.matn):
         kod = valyuta_kodi_topish(data.matn)
         natija = valyuta_kursi_olish(kod)
         return {"javob": javobni_tarjima_qil(natija, data.matn)}
+
     if kerak_mi_vaqt(data.matn) or kerak_mi_vaqt_ai(data.matn):
-        natija = dunyo_vaqti_olish(data.matn)
-        return {"javob": javobni_tarjima_qil(natija, data.matn)}
-    if kerak_mi_vaqt(data.matn):
-        return {"javob": dunyo_vaqti_olish(data.matn)}
-    if kerak_mi_vaqt(data.matn):
-        return {"javob": dunyo_vaqti_olish(data.matn)}
+        til = tilni_ai_aniqlash(data.matn)
+        shahar = joy_nomini_ai_topish(data.matn)
+
+        if not shahar:
+            return {"javob": javobni_tarjima_qil(
+                "Please specify the city name.", data.matn
+            )}
+
+        natija = babel_bilan_vaqt_olish(shahar, til)
+        if natija:
+            return {"javob": natija}
+
+        return {"javob": javobni_tarjima_qil(
+            "Sorry, I could not find the city's time zone.", data.matn
+        )}
+
     javob = gemini_javob(data.matn, data.session_id)
     return {"javob": javob}
 
