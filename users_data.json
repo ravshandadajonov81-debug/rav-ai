@@ -270,5 +270,20 @@
       }
     ],
     "qiziqishlar": []
+  },
+  "test_val2": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [
+      {
+        "role": "user",
+        "content": "Курс доллара сегодня"
+      },
+      {
+        "role": "assistant",
+        "content": "Alkinish, sizning ismingizni eslab qordim.\n\nMen sun'iy intellechtman va real vaqt rejimida (real-time) internetga ulanishimga bevosita erkim yo'q, shuning uchun **bugungi aniq kurs raqamini** sizga aytib bera olmayman. Kurslar har daqiqada o'zgarib turadi.\n\nEng ishonchlari ma'lumotlarni qidirish uchun quyidagi manbalarni kuzatishingizni tavsiya etaman:\n\n1.  **O'zbekiston markaziy banki:** [cb.uz](https://cb.uz)\n2.  **Valyuta birjalari:** Masalan, Nasixbank, Ipoteka Bank yoki boshqa yirik banklarning veb-saytlari.\n3.  **Axborot portalari:** kun.uz, daryo.uz kabi nashriyotlar kunlik kurslarni e'lon qilib turishi mumkin.\n\nAgar boshqa savollaringiz bo'lsa, albatta yozing!"
+      }
+    ],
+    "qiziqishlar": []
   }
 }

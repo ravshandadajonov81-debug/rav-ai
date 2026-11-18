@@ -195,7 +195,18 @@ def valyuta_kodi_topish(savol):
     return None
 
 def kerak_mi_valyuta(savol):
-    kalit = ["dollar", "euro", "rubl", "valyuta", "kurs", "som", "narxi qancha", "qancha turadi", "valyuta kursi", "dollar kursi", "euro kursi", "exchange rate", "currency"]
+    kalit = [
+        "dollar", "euro", "rubl", "valyuta", "kurs", "som",
+        "narxi qancha", "qancha turadi", "valyuta kursi", "dollar kursi", "euro kursi",
+        "exchange rate", "currency",
+        "курс", "доллар", "рубл", "валюта", "евро",
+        "tasso di cambio", "valuta", "dollaro", "quanto costa il dollaro",
+        "taux de change", "devise",
+        "wechselkurs", "wahrung",
+        "tipo de cambio", "divisa",
+        "汇率", "美元", "货币",
+        "exchange", "kurz meny", "kurs walut",
+    ]
     return any(k in savol.lower() for k in kalit)
 
 from zoneinfo import ZoneInfo
@@ -557,10 +568,18 @@ def savol_yuborish(data: SavolModel):
             shahar_ob = shahar_topish(data.matn)
         ob = ob_havo_olish(shahar_ob)
         if ob:
+            til_ob = tilni_ai_aniqlash(data.matn)
+            tarjima_ob = deep_tarjima_qil(ob, til_ob)
+            if tarjima_ob:
+                return {"javob": tarjima_ob}
             return {"javob": javobni_tarjima_qil(ob, data.matn)}
     if kerak_mi_valyuta(data.matn):
         kod = valyuta_kodi_topish(data.matn)
         natija = valyuta_kursi_olish(kod)
+        til_val = tilni_ai_aniqlash(data.matn)
+        tarjima_val = deep_tarjima_qil(natija, til_val)
+        if tarjima_val:
+            return {"javob": tarjima_val}
         return {"javob": javobni_tarjima_qil(natija, data.matn)}
     if kerak_mi_vaqt(data.matn) or kerak_mi_vaqt_ai(data.matn):
         til = tilni_ai_aniqlash(data.matn)
