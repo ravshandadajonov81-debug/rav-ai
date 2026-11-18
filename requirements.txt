@@ -9,3 +9,5 @@ tzdata
 geopy
 timezonefinder
 Babel
+
+deep-translator

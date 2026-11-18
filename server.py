@@ -1,4 +1,8 @@
 import os
+import certifi
+os.environ["SSL_CERT_FILE"] = certifi.where()
+os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
+import os
 import time
 import json
 import threading
@@ -486,14 +490,45 @@ async def telegram_webhook(request: Request):
         print("Webhook xato:", e)
     return {"ok": True}
 
+MYMEMORY_TILLAR_KESH = None
+
+def mymemory_til_kodi_topish(til_kodi):
+    global MYMEMORY_TILLAR_KESH
+    from deep_translator import MyMemoryTranslator
+    if MYMEMORY_TILLAR_KESH is None:
+        try:
+            MYMEMORY_TILLAR_KESH = MyMemoryTranslator(source="en-GB", target="en-GB").get_supported_languages(as_dict=True)
+        except Exception:
+            MYMEMORY_TILLAR_KESH = {}
+    til_kodi = til_kodi.lower()
+    qolda_mos = {
+        "zh-cn": "zh-CN", "zh": "zh-CN", "pt-br": "pt-BR",
+    }
+    if til_kodi in qolda_mos:
+        return qolda_mos[til_kodi]
+    for nom, kod in MYMEMORY_TILLAR_KESH.items():
+        if kod.lower() == til_kodi or kod.lower().startswith(til_kodi + "-"):
+            return kod
+    return til_kodi
+
+def deep_tarjima_qil(matn, til_kodi):
+    try:
+        from deep_translator import MyMemoryTranslator
+        kod = mymemory_til_kodi_topish(til_kodi)
+        natija = MyMemoryTranslator(source="en-GB", target=kod).translate(matn)
+        return natija
+    except Exception as e:
+        print("Deep-translator xatosi:", e)
+        return None
+
 def javobni_tarjima_qil(javob_matni, asl_savol):
     for urinish in range(3):
         try:
             messages = [
-                {"role": "system", "content": "Foydalanuvchi savolining aniq qaysi tilda va qaysi alifboda yozilganini aniqla. Keyin berilgan MATNNI (vaqt yoki valyuta natijasi) aynan osha tilga va osha alifboga tarjima qil. Diqqat: savolni emas, faqat berilgan MATNNI tarjima qil va qaytar. Agar savol xitoy tilida bolsa javob ham xitoy tilida ieroglif bilan bolishi kerak. Faqat tarjima qilingan natija matnini yoz, hech qanday izoh yozma, savolni takrorlama."},
+                {"role": "system", "content": "Foydalanuvchi savolining aniq qaysi tilda va qaysi alifboda yozilganini aniqla. Keyin berilgan MATNNI (vaqt, obhavo yoki valyuta natijasi) TOLIQ va BUTUNLAY aynan osha tilga va osha alifboga tarjima qil. MUHIM: matndagi BARCHA sozlarni tarjima qil, jumladan yorliq sozlarni ham (masalan Harorat, Namlik, Shamol, Holat, Bugun, Ertaga kabi sozlarning barchasini ham tarjima qil) - hech bitta ozbekcha yoki boshqa til sozi qolib ketmasin. Sonlar, foiz belgisi, gradus belgisi va shahar nomlarini ozgartirma. Shahar, davlat va joy nomlarini ASLO boshqa joy nomiga almashtirma. Agar savol xitoy tilida bolsa javob TOLIQ xitoy tilida ieroglif bilan bolishi kerak, bironta ham ozbekcha soz qolmasligi kerak. Faqat tarjima qilingan natija matnini yoz, hech qanday izoh yozma, savolni takrorlama."},
                 {"role": "user", "content": "Savol tili aniqlanadigan matn: " + asl_savol + chr(10) + "Tarjima qilinishi kerak bolgan natija: " + javob_matni},
             ]
-            response = client.chat.completions.create(model="qwen/qwen3.8-27b", messages=messages, max_tokens=300)
+            response = client.chat.completions.create(model="qwen/qwen3.8-27b", messages=messages, max_tokens=800)
             natija = response.choices[0].message.content.strip()
             if natija and natija != asl_savol.strip():
                 return natija
@@ -510,10 +545,17 @@ def savol_yuborish(data: SavolModel):
         if yangiliklar:
             javob = "So'nggi yangiliklar:\n" + "\n".join([f"{i+1}. {y}" for i, y in enumerate(yangiliklar)])
             return {"javob": javob}
-    kalit_ob = ["ob-havo", "ob havo", "havo", "weather", "harorat", "iqlim"]
+    kalit_ob = ["ob-havo", "ob havo", "havo", "weather", "harorat", "iqlim", "temps", "wetter", "clima", "tempo", "погода", "havo-iqlim", "天气", "mausam", "thoi tiet"]
     if any(s in data.matn.lower() for s in kalit_ob):
-        shahar = shahar_topish(data.matn)
-        ob = ob_havo_olish(shahar)
+        shahar_ob = None
+        for urinish_ob in range(4):
+            shahar_ob = joy_nomini_ai_topish(data.matn)
+            if shahar_ob:
+                break
+            time.sleep(1)
+        if not shahar_ob:
+            shahar_ob = shahar_topish(data.matn)
+        ob = ob_havo_olish(shahar_ob)
         if ob:
             return {"javob": javobni_tarjima_qil(ob, data.matn)}
     if kerak_mi_valyuta(data.matn):

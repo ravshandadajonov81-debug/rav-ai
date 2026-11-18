@@ -3,12 +3,12 @@ import io
 with io.open("server.py", "r", encoding="utf-8") as f:
     content = f.read()
 
-old = 'kalit = ["dollar", "euro", "rubl", "valyuta", "kurs", "som", "narxi qancha", "qancha turadi", "valyuta kursi", "dollar kursi", "euro kursi", "exchange rate", "currency", "usd", "eur", "rub"]'
+eski = '''            MYMEMORY_TILLAR_KESH = MyMemoryTranslator().get_supported_languages(as_dict=True)'''
 
-new = 'kalit = ["dollar", "euro", "rubl", "valyuta", "kurs", "som", "narxi qancha", "qancha turadi", "valyuta kursi", "dollar kursi", "euro kursi", "exchange rate", "currency"]'
+yangi = '''            MYMEMORY_TILLAR_KESH = MyMemoryTranslator(source="en-GB", target="en-GB").get_supported_languages(as_dict=True)'''
 
-if old in content:
-    content = content.replace(old, new, 1)
+if eski in content:
+    content = content.replace(eski, yangi)
     with io.open("server.py", "w", encoding="utf-8") as f:
         f.write(content)
     print("Tuzatildi!")
