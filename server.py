@@ -272,12 +272,15 @@ VALYUTA_ISHONCHLI_SOZLAR = {
     "manat": "AZN",
     "hryvnia": "UAH", "grivna": "UAH",
     "rupiya": "INR",
-    "von": "KRW", "won": "KRW",
     "shveytsariya franki": "CHF",
 }
 
-VALYUTA_NOANIQ_SOZLAR = {"real": "BRL", "frank": "CHF", "franc": "CHF"}
-VALYUTA_NOANIQ_BLOKLOVCHI = ["madrid", "sociedad", "futbol", "football", "match", "o\'yin", "oyin", "jamoa", "sport"]
+VALYUTA_NOANIQ_SOZLAR = {"real": "BRL", "frank": "CHF", "franc": "CHF", "won": "KRW", "von": "KRW"}
+VALYUTA_NOANIQ_BLOKLOVCHI = [
+    "madrid", "sociedad", "futbol", "football", "match", "o\'yin", "oyin", "jamoa", "sport",
+    "who won", "game", "played", "player", "team", "cup", "league", "championship",
+    "goldi", "g\'oldi", "qoldi",
+]
 
 def valyuta_kodi_ai_topish(savol):
     try:
@@ -300,11 +303,17 @@ def internetdan_qidirish(savol):
     backendlar = ["bing", "google", "duckduckgo"]
     for nom in backendlar:
         try:
-            natijalar = DDGS(verify=False).text(savol, max_results=5, backend=nom)
+            natijalar = DDGS(verify=False).text(savol, max_results=4, backend=nom)
             if natijalar:
                 matn = ""
-                for n in natijalar:
-                    matn += "- " + n.get("title", "") + ": " + n.get("body", "") + chr(10)
+                for n in natijalar[:4]:
+                    sarlavha = n.get("title", "").strip()
+                    if len(sarlavha) > 70:
+                        sarlavha = sarlavha[:70] + "..."
+                    tavsif = n.get("body", "").strip()
+                    if len(tavsif) > 180:
+                        tavsif = tavsif[:180] + "..."
+                    matn += "- " + sarlavha + ": " + tavsif + chr(10)
                 return matn
         except Exception as e:
             print("Internet qidiruv xatosi (" + nom + "):", e)
