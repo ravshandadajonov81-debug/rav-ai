@@ -186,7 +186,20 @@ VALYUTA_KOD_NOM = {
     "INR": "Rupiya", "KRW": "Von", "CHF": "Shveytsariya franki", "BRL": "Real",
 }
 
-def valyuta_kursi_olish(maqsad=None):
+def miqdor_topish(savol):
+    import re
+    topilgan = re.findall(r"\d[\d\s.,]*\d|\d", savol)
+    for raqam_matni in topilgan:
+        tozalangan = raqam_matni.replace(" ", "").replace(",", "")
+        try:
+            qiymat = float(tozalangan)
+            if qiymat > 0:
+                return qiymat
+        except ValueError:
+            continue
+    return 1
+
+def valyuta_kursi_olish(maqsad=None, miqdor=1):
     try:
         url = "https://open.er-api.com/v6/latest/USD"
         r = http_client.get(url, timeout=8)
@@ -196,9 +209,10 @@ def valyuta_kursi_olish(maqsad=None):
             uzs = rates.get("UZS", 0)
             if maqsad and maqsad in rates and maqsad != 'UZS':
                 kurs = rates[maqsad]
-                som_narx = round(uzs / kurs)
+                som_narx = round((uzs / kurs) * miqdor)
                 nom = VALYUTA_KOD_NOM.get(maqsad, maqsad)
-                return "1 " + nom + " (" + maqsad + ") = " + str(som_narx) + " som"
+                miqdor_matni = str(int(miqdor)) if miqdor == int(miqdor) else str(miqdor)
+                return miqdor_matni + " " + nom + " (" + maqsad + ") = " + str(som_narx) + " som"
             eur = rates.get("EUR", 0)
             rub = rates.get("RUB", 0)
             natija = "Valyuta kurslari:" + chr(10)
@@ -262,7 +276,7 @@ VALYUTA_RUXSAT_ETILGAN_KODLAR = {"USD", "EUR", "RUB", "CNY", "GBP", "JPY", "TRY"
 VALYUTA_ISHONCHLI_SOZLAR = {
     "dollar": "USD", "dollari": "USD", "dolar": "USD", "doliar": "USD",
     "euro": "EUR", "yevro": "EUR",
-    "rubl": "RUB", "rublo": "RUB",
+    "rubl": "RUB", "rublo": "RUB", "rubil": "RUB", "rubl'": "RUB",
     "yuan": "CNY",
     "funt sterling": "GBP", "sterling": "GBP",
     "yen": "JPY", "yena": "JPY",
@@ -515,7 +529,52 @@ def shahar_topish(savol):
             return shahar.title()
     return "Tashkent"
 
-def ob_havo_olish(shahar):
+def ob_havo_tavsif_tarjima_qil(matn_en):
+    try:
+        import html
+        from deep_translator import MyMemoryTranslator
+        kod = mymemory_til_kodi_topish("uz")
+        natija = MyMemoryTranslator(source="en-GB", target=kod).translate(matn_en)
+        if natija:
+            natija = html.unescape(natija)
+        return natija if natija else matn_en
+    except Exception:
+        return matn_en
+
+
+def ob_havo_yorliq_tarjima_qil(soz_uz, til_kodi):
+    try:
+        if not til_kodi or til_kodi.lower() in ("uz", "uz-uz"):
+            return soz_uz
+        import html
+        from deep_translator import MyMemoryTranslator
+        kod = mymemory_til_kodi_topish(til_kodi)
+        manba_kod = mymemory_til_kodi_topish("uz")
+        natija = MyMemoryTranslator(source=manba_kod, target=kod).translate(soz_uz)
+        if natija:
+            natija = html.unescape(natija)
+        return natija if natija else soz_uz
+    except Exception:
+        return soz_uz
+
+def ob_havo_matn_tarjima_qil(matn_en, til_kodi):
+    try:
+        if not til_kodi or til_kodi.lower() in ("en", "en-gb", "en-us"):
+            return matn_en
+        import html, re
+        from deep_translator import MyMemoryTranslator
+        himoya_belgisi = "XSOMX9Y"
+        matn_himoyalangan = re.sub(r"\bsom\b", himoya_belgisi, matn_en, flags=re.IGNORECASE)
+        kod = mymemory_til_kodi_topish(til_kodi)
+        natija = MyMemoryTranslator(source="en-GB", target=kod).translate(matn_himoyalangan)
+        if natija:
+            natija = html.unescape(natija)
+            natija = natija.replace(himoya_belgisi, "som").replace(himoya_belgisi.lower(), "som").replace(himoya_belgisi.capitalize(), "Som")
+        return natija if natija else matn_en
+    except Exception:
+        return matn_en
+
+def ob_havo_olish(shahar, til_kodi=None):
     try:
         url = "https://wttr.in/" + shahar.replace(" ", "+") + "?format=j1"
         r = http_client.get(url, timeout=8)
@@ -526,16 +585,24 @@ def ob_havo_olish(shahar):
             his = cur["FeelsLikeC"]
             namlik = cur["humidity"]
             shamol = cur["windspeedKmph"]
-            tavsif = cur["weatherDesc"][0]["value"]
+            tavsif_en = cur["weatherDesc"][0]["value"]
             weather3 = d["weather"]
-            prognoz = ""
-            kunlar = ["Bugun", "Ertaga", "Indinga"]
+            kunlar_en = ["Today", "Tomorrow", "Day after tomorrow"]
+            qatorlar = []
+            qatorlar.append(shahar + " weather:")
+            qatorlar.append("Temperature: " + harorat + "C (feels like: " + his + "C)")
+            qatorlar.append("Humidity: " + namlik + "%")
+            qatorlar.append("Wind: " + shamol + " km/h")
+            qatorlar.append("Condition: " + tavsif_en)
+            qatorlar.append("3-day forecast:")
             for i, w in enumerate(weather3[:3]):
                 min_t = w["mintempC"]
                 max_t = w["maxtempC"]
-                tavsif3 = w["hourly"][4]["weatherDesc"][0]["value"]
-                prognoz += f"{kunlar[i]}: {min_t}C ~ {max_t}C, {tavsif3}\n"
-            return f"{shahar} ob-havosi:\nHarorat: {harorat}C (his: {his}C)Namlik: {namlik}%\nShamol: {shamol} km/hHolat: {tavsif}\n3 kunlik:\n{prognoz}"
+                tavsif3_en = w["hourly"][4]["weatherDesc"][0]["value"]
+                qatorlar.append(kunlar_en[i] + ": " + min_t + "C ~ " + max_t + "C, " + tavsif3_en)
+            matn_en = chr(10).join(qatorlar)
+            maqsad_til = til_kodi if til_kodi else "uz"
+            return ob_havo_matn_tarjima_qil(matn_en, maqsad_til)
     except Exception as e:
         print("Ob-havo xatosi:", e)
     try:
@@ -546,7 +613,6 @@ def ob_havo_olish(shahar):
     except:
         pass
     return ""
-
 def internet_qidirish(savol):
     natija = ""
     if kerak_mi_yangilik(savol):
@@ -673,7 +739,16 @@ def ob_havo_tarjima_qil(matn, til_kodi):
 
 def ob_havo_toliq_tarjima_qil(matn, til_kodi):
     try:
-        natija = deep_tarjima_qil(matn, til_kodi)
+        majburiy_til = "uz" if (not til_kodi or til_kodi.lower() in ("uz", "uz-uz")) else til_kodi
+        from deep_translator import MyMemoryTranslator
+        import html, re
+        himoya_belgisi = "XSOMX9Y"
+        matn_himoyalangan = re.sub(r"\bsom\b", himoya_belgisi, matn, flags=re.IGNORECASE)
+        kod = mymemory_til_kodi_topish(majburiy_til)
+        natija = MyMemoryTranslator(source="en-GB", target=kod).translate(matn_himoyalangan)
+        if natija:
+            natija = html.unescape(natija)
+            natija = natija.replace(himoya_belgisi, "som").replace(himoya_belgisi.lower(), "som").replace(himoya_belgisi.capitalize(), "Som")
         if not natija:
             return matn
         qolgan_ozbekcha = ["Bugun:", "Ertaga:", "Indinga:", "kunlik"]
@@ -751,16 +826,14 @@ def savol_yuborish(data: SavolModel):
             time.sleep(1)
         if not shahar_ob:
             shahar_ob = shahar_topish(data.matn)
-        ob = ob_havo_olish(shahar_ob)
+        til_ob = tilni_ai_aniqlash(data.matn)
+        ob = ob_havo_olish(shahar_ob, til_ob)
         if ob:
-            til_ob = tilni_ai_aniqlash(data.matn)
-            tarjima_ob = ob_havo_toliq_tarjima_qil(ob, til_ob)
-            if tarjima_ob:
-                return {"javob": tarjima_ob}
-            return {"javob": javobni_tarjima_qil(ob, data.matn)}
+            return {"javob": ob}
     if kerak_mi_valyuta(data.matn):
         kod = valyuta_kodi_topish(data.matn)
-        natija = valyuta_kursi_olish(kod)
+        miqdor = miqdor_topish(data.matn)
+        natija = valyuta_kursi_olish(kod, miqdor)
         til_val = tilni_ai_aniqlash(data.matn)
         tarjima_val = deep_tarjima_qil(natija, til_val)
         if tarjima_val:

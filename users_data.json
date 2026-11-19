@@ -465,5 +465,20 @@
       }
     ],
     "qiziqishlar": []
+  },
+  "miqdor_test_5086485657879580067": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [
+      {
+        "role": "user",
+        "content": "1000 rubil necha som"
+      },
+      {
+        "role": "assistant",
+        "content": "Men aniq va haqiqiy nevchislik kursini raqam bilan taqdim eta olmadim, chunki valyuta kurslari har kun o'zgarib turadi.\n\nLekin odatda, **1 rus rubli (RUB)** taxminan **600 – 700 o'zbek so'mi (UZS)** atrofida bo'ladi (bu kurs mablag' miqdori, mamlakat va moliyaviy bozorning holatiga qarab 600–800 oralig'ida taqqoslashi mumkin).\n\nShu asosda hisoblaymiz:\n*   Agar kurs **650 so'm** deb olsak: $1000 \\times 650 = 650,000$ so'm.\n*   Agar kurs **700 so'm** deb olsak: $1000 \\times 700 = 700,000$ so'm.\n\n**Xulosa:** 1000 rubl taxminan **600,000 dan 700,000 so'mgacha** bo'lishi mumkin.\n\n💡 **Aniq ma'lumot uchun:** Iltimos, bugungi kundagi eng ishonchli kursni **Narxlar departamenti** saytidan yoki banklar rasmiy saytlaridan tekshirib oling."
+      }
+    ],
+    "qiziqishlar": []
   }
 }
