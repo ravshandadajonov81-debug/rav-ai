@@ -11,3 +11,5 @@ timezonefinder
 Babel
 
 deep-translator
+
+ddgs

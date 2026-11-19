@@ -214,32 +214,123 @@ def valyuta_kursi_olish(maqsad=None):
 
 def valyuta_kodi_topish(savol):
     savol_l = savol.lower()
+    for soz, kod in VALYUTA_ISHONCHLI_SOZLAR.items():
+        if soz in savol_l:
+            return kod
     nomlar = valyuta_nomlari()
     for nom, kod in nomlar.items():
-        if nom in savol_l:
+        if nom in VALYUTA_NOANIQ_SOZLAR and nom in savol_l:
+            if any(blok in savol_l for blok in VALYUTA_NOANIQ_BLOKLOVCHI):
+                continue
+            return kod
+        elif nom not in VALYUTA_NOANIQ_SOZLAR and nom in savol_l:
             return kod
     return None
 
+def kerak_mi_internet_ai(savol):
+    try:
+        messages = [
+            {"role": "system", "content": "Foydalanuvchi savoli internetdan joriy yoki real vaqt malumot (yangiliklar, musobaqa natijalari, kim yutdi/goliб boldi, bugungi voqealar, statistika, aniq ommaviy faktlar) qidirishni talab qiladimi? Faqat HA yoki YOQ deb javob ber, boshqa hech narsa yozma."},
+            {"role": "user", "content": savol},
+        ]
+        response = client.chat.completions.create(model="openai/gpt-oss-120b", messages=messages, max_tokens=200)
+        javob = response.choices[0].message.content.strip().lower()
+        if "ha" in javob[:10]:
+            return True
+        return False
+    except Exception as e:
+        print("Internet aniqlash xatosi:", e)
+        return False
+
+def kerak_mi_valyuta_ai(savol):
+    try:
+        messages = [
+            {"role": "system", "content": "Foydalanuvchi savoli valyuta kursi, pul almashtirish narxi haqida so\'rayaptimi (masalan dollar, euro, yuan va hokazo pul birligining somga yoki boshqa pulga nisbatan narxi)? Agar bu boshqa mavzu (masport, odam ismi, joy nomi va h.k.) bolsa, YOQ deb javob ber. Faqat HA yoki YOQ deb javob ber, boshqa hech narsa yozma."},
+            {"role": "user", "content": savol},
+        ]
+        response = client.chat.completions.create(model="openai/gpt-oss-120b", messages=messages, max_tokens=200)
+        javob = response.choices[0].message.content.strip().lower()
+        if "ha" in javob[:10]:
+            return True
+        return False
+    except Exception as e:
+        print("Valyuta AI aniqlash xatosi:", e)
+        return False
+
+VALYUTA_RUXSAT_ETILGAN_KODLAR = {"USD", "EUR", "RUB", "CNY", "GBP", "JPY", "TRY", "AED", "KZT", "AZN", "KGS", "UAH", "INR", "KRW", "CHF", "BRL"}
+
+VALYUTA_ISHONCHLI_SOZLAR = {
+    "dollar": "USD", "dollari": "USD", "dolar": "USD", "doliar": "USD",
+    "euro": "EUR", "yevro": "EUR",
+    "rubl": "RUB", "rublo": "RUB",
+    "yuan": "CNY",
+    "funt sterling": "GBP", "sterling": "GBP",
+    "yen": "JPY", "yena": "JPY",
+    "lira": "TRY",
+    "dirham": "AED",
+    "tenge": "KZT",
+    "manat": "AZN",
+    "hryvnia": "UAH", "grivna": "UAH",
+    "rupiya": "INR",
+    "von": "KRW", "won": "KRW",
+    "shveytsariya franki": "CHF",
+}
+
+VALYUTA_NOANIQ_SOZLAR = {"real": "BRL", "frank": "CHF", "franc": "CHF"}
+VALYUTA_NOANIQ_BLOKLOVCHI = ["madrid", "sociedad", "futbol", "football", "match", "o\'yin", "oyin", "jamoa", "sport"]
+
+def valyuta_kodi_ai_topish(savol):
+    try:
+        savol_l = savol.lower()
+        for soz, kod in VALYUTA_ISHONCHLI_SOZLAR.items():
+            if soz in savol_l:
+                return kod
+        for soz, kod in VALYUTA_NOANIQ_SOZLAR.items():
+            if soz in savol_l:
+                if any(blok in savol_l for blok in VALYUTA_NOANIQ_BLOKLOVCHI):
+                    return None
+                return kod
+        return None
+    except Exception as e:
+        print("Valyuta kodi topish xatosi:", e)
+        return None
+
+def internetdan_qidirish(savol):
+    from ddgs import DDGS
+    backendlar = ["bing", "google", "duckduckgo"]
+    for nom in backendlar:
+        try:
+            natijalar = DDGS(verify=False).text(savol, max_results=5, backend=nom)
+            if natijalar:
+                matn = ""
+                for n in natijalar:
+                    matn += "- " + n.get("title", "") + ": " + n.get("body", "") + chr(10)
+                return matn
+        except Exception as e:
+            print("Internet qidiruv xatosi (" + nom + "):", e)
+    return None
+
+VALYUTA_UMUMIY_SOZLAR = [
+    "valyuta", "kurs", "exchange rate", "currency", "курс", "валюта",
+    "tasso di cambio", "valuta", "taux de change", "devise",
+    "wechselkurs", "wahrung", "tipo de cambio", "divisa",
+    "汇率", "货币", "exchange", "kurs walut",
+    "سعر الصرف", "عملة", "환율", "nilai tukar", "kurs mata uang",
+]
+
 def kerak_mi_valyuta(savol):
-    kalit = [
-        "dollar", "euro", "rubl", "valyuta", "kurs", "som",
-        "narxi qancha", "qancha turadi", "valyuta kursi", "dollar kursi", "euro kursi",
-        "exchange rate", "currency",
-        "курс", "доллар", "рубл", "валюта", "евро",
-        "tasso di cambio", "valuta", "dollaro", "quanto costa il dollaro",
-        "taux de change", "devise",
-        "wechselkurs", "wahrung",
-        "tipo de cambio", "divisa", "cuanto vale el dolar", "cuanto vale",
-        "汇率", "美元", "货币",
-        "exchange", "kurz meny", "kurs walut",
-        "سعر الدولار", "سعر الصرف", "الدولار", "عملة",
-        "환율", "달러", "원화",
-        "yuan", "yen", "lira", "dirham", "tenge", "manat", "hryvnia", "rupiya",
-        "won", "franc", "real",
-        "câu hỏi tỷ giá", "ty gia", "tỷ giá",
-        "nilai tukar", "kurs mata uang",
-    ]
-    return any(k in savol.lower() for k in kalit)
+    savol_l = savol.lower()
+    if any(s in savol_l for s in VALYUTA_UMUMIY_SOZLAR):
+        return True
+    for soz in VALYUTA_ISHONCHLI_SOZLAR:
+        if soz in savol_l:
+            return True
+    for soz in VALYUTA_NOANIQ_SOZLAR:
+        if soz in savol_l:
+            if any(blok in savol_l for blok in VALYUTA_NOANIQ_BLOKLOVCHI):
+                return False
+            return True
+    return False
 
 from zoneinfo import ZoneInfo
 from datetime import datetime
@@ -681,6 +772,12 @@ def savol_yuborish(data: SavolModel):
             return {"javob": natija}
         eski_natija = dunyo_vaqti_olish(data.matn)
         return {"javob": javobni_tarjima_qil(eski_natija, data.matn)}
+    if kerak_mi_internet_ai(data.matn):
+        qidiruv_natija = internetdan_qidirish(data.matn)
+        if qidiruv_natija:
+            kontekst_matn = "Quyidagi internetdan topilgan malumotlar asosida foydalanuvchi savoliga tabiiy, qisqa va aniq javob ber. Faqat kerakli malumotni ishlat, manba royxatini qaytarma." + chr(10) + chr(10) + qidiruv_natija + chr(10) + chr(10) + "Foydalanuvchi savoli: " + data.matn
+            javob_internet = gemini_javob(kontekst_matn, data.session_id)
+            return {"javob": javob_internet}
     javob = gemini_javob(data.matn, data.session_id)
     return {"javob": javob}
 
