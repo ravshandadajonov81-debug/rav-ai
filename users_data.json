@@ -315,5 +315,50 @@
       }
     ],
     "qiziqishlar": []
+  },
+  "valyuta_test_2": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [
+      {
+        "role": "user",
+        "content": "سعر الدولار اليوم"
+      },
+      {
+        "role": "assistant",
+        "content": "Assalomu alaykum! Main RAVman.\n\nSiz savolni **Arabcha** yozdingiz.\n\nKechirasiz, lekin asosiy qoidamga ko'ra, men faqat siz **Quyos (O'zbek) tili**da yozgan savollarga quyos tilda javob beraman. Agar savolingizni Quyos tilida (ya'ni \"Bugungi dollar kursi qancha?\") yozib yuborsangiz, so'nggi ma'lumotlarni taqdim etishga harakat qilaman.\n\nEslatma: Men real vaqt rejimida internetga ulanmaganman (oflayn ishlashim mumkin), shuning uchun aniq va joriy narxlar o'zgarib turadi. Eng aniq kurs uchun mahalliy bank websaytlari, \"Uzexchange\" yoki \"Valyuta.uz\" kabi ishonchli manbalarni tekshirishni tavsiya qilaman.\n\nQaysi millatga sifatlab to'lov qilmoqchisiz? (Bug'doy, Guli, aniq turlar uchun farq qilishi mumkin.)"
+      }
+    ],
+    "qiziqishlar": []
+  },
+  "valyuta_test_3": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [
+      {
+        "role": "user",
+        "content": "오늘 달러 환율"
+      },
+      {
+        "role": "assistant",
+        "content": "안녕하세요! 저는 RAV AI입니다.\n\n죄송하지만, 저는 실시간 인터넷 데이터나 현재 시점의 주식, 외환 시장 정보에 직접 연결되어 있지 않아서 **오늘의 정확한 실시간 달러 환율**을 알려드리기 어렵습니다.\n\n최신 환율은 다음과 같은 방법으로 확인하시는 것이 가장 정확합니다:\n1.  **금융감독원 전자공시시스템 (DART)** - 외국환은행 고시 환율\n2.  **각 은행의 공식 웹사이트 또는 모바일 앱**\n3.  **증권사 앱** (삼성증권, 네이버 증권 등)\n4.  **금융 포털 사이트** (네이버, 다음 의 환율 검색)\n\n혹시 환율 계산에 대한 공식이나 과거 환율 추이에 대한 일반적인 설명이 필요하시다면 도움을 드릴 수 있습니다. 추가로 궁금한 점이 있으시면 편하게 말씀해 주세요!"
+      }
+    ],
+    "qiziqishlar": []
+  },
+  "valyuta_test_5": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [
+      {
+        "role": "user",
+        "content": "Cuanto vale el dolar hoy"
+      },
+      {
+        "role": "assistant",
+        "content": "Hola. Como soy una IA, no tengo acceso a información en tiempo real, por lo que no puedo darte la cotización exacta del dólar en este preciso instante.\n\nPara obtener el precio actual y más preciso, te recomiendo consultar:\n\n1.  El **Banco Central** de tu país (ej. BCRA en Argentina, Banxico en México, BCV en Venezuela, etc.).\n2.  Bancos comerciales o casas de cambio locales.\n3.  Sitios web de finanzas a tiempo real como **Bloomberg**, **Reuters** o la app de tu banco.\n\n¿En qué moneda o país estás interesado, para darte más contexto sobre dónde buscar?"
+      }
+    ],
+    "qiziqishlar": []
   }
 }

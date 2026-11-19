@@ -159,7 +159,32 @@ threading.Thread(target=keep_alive, daemon=True).start()
 threading.Thread(target=webhook_ornatish, daemon=True).start()
 
 def valyuta_nomlari():
-    return {'dollar': 'USD', 'dollari': 'USD', 'euro': 'EUR', 'yevro': 'EUR', 'rubl': 'RUB', 'funt': 'GBP', 'sterling': 'GBP', 'yen': 'JPY', 'yena': 'JPY', 'yuan': 'CNY', 'lira': 'TRY', 'dirham': 'AED', 'tenge': 'KZT', 'manat': 'AZN', 'som': 'KGS', 'hryvnia': 'UAH', 'rupiya': 'INR', 'von': 'KRW', 'frank': 'CHF', 'real': 'BRL'}
+    return {
+        'dollar': 'USD', 'dollari': 'USD', 'dolar': 'USD', 'dólar': 'USD', 'доллар': 'USD',
+        'الدولار': 'USD', 'دولار': 'USD', '달러': 'USD', '美元': 'USD', 'usd': 'USD',
+        'euro': 'EUR', 'yevro': 'EUR', 'евро': 'EUR', 'اليورو': 'EUR', '유로': 'EUR', '欧元': 'EUR', 'eur': 'EUR',
+        'rubl': 'RUB', 'rublo': 'RUB', 'рубль': 'RUB', 'рубл': 'RUB', 'الروبل': 'RUB', '루블': 'RUB', '卢布': 'RUB', 'rub': 'RUB',
+        'funt': 'GBP', 'sterling': 'GBP', 'фунт': 'GBP', 'الجنيه': 'GBP', '파운드': 'GBP', '英镑': 'GBP',
+        'yen': 'JPY', 'yena': 'JPY', 'иена': 'JPY', 'الين': 'JPY', '엔화': 'JPY', '日元': 'JPY',
+        'yuan': 'CNY', 'юань': 'CNY', 'اليوان': 'CNY', '위안': 'CNY', '人民币': 'CNY',
+        'lira': 'TRY', 'лира': 'TRY', 'الليرة': 'TRY', '리라': 'TRY', '里拉': 'TRY',
+        'dirham': 'AED', 'дирхам': 'AED', 'الدرهم': 'AED', '디르함': 'AED', '迪拉姆': 'AED',
+        'tenge': 'KZT', 'тенге': 'KZT',
+        'manat': 'AZN', 'манат': 'AZN',
+        'som': 'KGS',
+        'hryvnia': 'UAH', 'гривна': 'UAH', 'гривня': 'UAH',
+        'rupiya': 'INR', 'rupee': 'INR', 'рупия': 'INR', 'الروبية': 'INR', '루피': 'INR', '卢比': 'INR',
+        'von': 'KRW', 'won': 'KRW', 'вона': 'KRW', '원화': 'KRW', '韩元': 'KRW',
+        'frank': 'CHF', 'franc': 'CHF', 'франк': 'CHF', '法郎': 'CHF',
+        'real': 'BRL', 'реал': 'BRL',
+    }
+
+VALYUTA_KOD_NOM = {
+    "USD": "Dollar", "EUR": "Euro", "RUB": "Rubl", "GBP": "Funt sterling",
+    "JPY": "Yen", "CNY": "Yuan", "TRY": "Lira", "AED": "Dirham",
+    "KZT": "Tenge", "AZN": "Manat", "KGS": "Som", "UAH": "Grivna",
+    "INR": "Rupiya", "KRW": "Von", "CHF": "Shveytsariya franki", "BRL": "Real",
+}
 
 def valyuta_kursi_olish(maqsad=None):
     try:
@@ -172,7 +197,8 @@ def valyuta_kursi_olish(maqsad=None):
             if maqsad and maqsad in rates and maqsad != 'UZS':
                 kurs = rates[maqsad]
                 som_narx = round(uzs / kurs)
-                return "1 " + maqsad + " = " + str(som_narx) + " som"
+                nom = VALYUTA_KOD_NOM.get(maqsad, maqsad)
+                return "1 " + nom + " (" + maqsad + ") = " + str(som_narx) + " som"
             eur = rates.get("EUR", 0)
             rub = rates.get("RUB", 0)
             natija = "Valyuta kurslari:" + chr(10)
@@ -203,9 +229,15 @@ def kerak_mi_valyuta(savol):
         "tasso di cambio", "valuta", "dollaro", "quanto costa il dollaro",
         "taux de change", "devise",
         "wechselkurs", "wahrung",
-        "tipo de cambio", "divisa",
+        "tipo de cambio", "divisa", "cuanto vale el dolar", "cuanto vale",
         "汇率", "美元", "货币",
         "exchange", "kurz meny", "kurs walut",
+        "سعر الدولار", "سعر الصرف", "الدولار", "عملة",
+        "환율", "달러", "원화",
+        "yuan", "yen", "lira", "dirham", "tenge", "manat", "hryvnia", "rupiya",
+        "won", "franc", "real",
+        "câu hỏi tỷ giá", "ty gia", "tỷ giá",
+        "nilai tukar", "kurs mata uang",
     ]
     return any(k in savol.lower() for k in kalit)
 
@@ -554,9 +586,17 @@ def ob_havo_toliq_tarjima_qil(matn, til_kodi):
 
 def deep_tarjima_qil(matn, til_kodi):
     try:
+        if til_kodi and til_kodi.lower() in ("uz", "uz-uz"):
+            return matn
         from deep_translator import MyMemoryTranslator
+        import html, re
+        himoya_belgisi = "XSOMX9Y"
+        matn_himoyalangan = re.sub(r"\bsom\b", himoya_belgisi, matn, flags=re.IGNORECASE)
         kod = mymemory_til_kodi_topish(til_kodi)
-        natija = MyMemoryTranslator(source="en-GB", target=kod).translate(matn)
+        natija = MyMemoryTranslator(source="en-GB", target=kod).translate(matn_himoyalangan)
+        if natija:
+            natija = html.unescape(natija)
+            natija = natija.replace(himoya_belgisi, "som").replace(himoya_belgisi.lower(), "som").replace(himoya_belgisi.capitalize(), "Som")
         return natija
     except Exception as e:
         print("Deep-translator xatosi:", e)
