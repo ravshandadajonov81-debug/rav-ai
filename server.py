@@ -857,7 +857,9 @@ def savol_yuborish(data: SavolModel):
     if kerak_mi_internet_ai(data.matn):
         qidiruv_natija = internetdan_qidirish(data.matn)
         if qidiruv_natija:
-            kontekst_matn = "Quyidagi internetdan topilgan malumotlar asosida foydalanuvchi savoliga tabiiy, qisqa va aniq javob ber. Faqat kerakli malumotni ishlat, manba royxatini qaytarma." + chr(10) + chr(10) + qidiruv_natija + chr(10) + chr(10) + "Foydalanuvchi savoli: " + data.matn
+            from datetime import datetime
+            bugungi_sana = datetime.now().strftime("%Y-%m-%d (%A)")
+            kontekst_matn = "Bugungi sana: " + bugungi_sana + "." + chr(10) + "Quyidagi internetdan topilgan malumotlar asosida foydalanuvchi savoliga tabiiy, qisqa va aniq javob ber. Agar savolda \"kecha\", \"bugun\", \"yesterday\", \"today\" kabi nisbiy sana borsa, yuqoridagi bugungi sanaga nisbatan hisobla. Faqat kerakli malumotni ishlat, manba royxatini qaytarma." + chr(10) + chr(10) + qidiruv_natija + chr(10) + chr(10) + "Foydalanuvchi savoli: " + data.matn
             javob_internet = gemini_javob(kontekst_matn, data.session_id)
             return {"javob": javob_internet}
     javob = gemini_javob(data.matn, data.session_id)

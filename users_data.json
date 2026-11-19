@@ -480,5 +480,43 @@
       }
     ],
     "qiziqishlar": []
+  },
+  "user_nf6yd6rwk": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [
+      {
+        "role": "user",
+        "content": "Who won the match between Barcelona and Real Madrid yesterday"
+      },
+      {
+        "role": "assistant",
+        "content": "I don't have access to real-time information, so I cannot tell you the result of the match that took place \"yesterday,\" as my knowledge cutoff prevents me from viewing live sports scores or recent news.\n\nTo find out the winner, I recommend checking a reliable sports news source, a dedicated football app, or the official websites of La Liga, FC Barcelona, and Real Madrid."
+      },
+      {
+        "role": "user",
+        "content": "Quyidagi internetdan topilgan malumotlar asosida foydalanuvchi savoliga tabiiy, qisqa va aniq javob ber. Faqat kerakli malumotni ishlat, manba royxatini qaytarma.\n\n- Barcelona vs Real Madrid HIGHLIGHTS: BAR beat RMA 2-0 to lift ...: May 10, 2026 · In the final El Clasico of the 2025–26 season, Barcelona (BAR) beat Real Madrid (RMA) 2-0 at Camp Nou on Monday thanks to brilliant goals from Marcus Rashford and Fe...\n- Results - FC Barcelona Official website: Nov 8, 2026 · Barça first team results page for LaLiga, Champions League and Copa del Rey.\n- Barcelona 1 - 2 Real Madrid - Match Report & Highlights: Oct 25, 2026 · Kylian Mbappe's double took Real Madrid to a famous 2-1 Clasico win, which had Jose Mourinho sliding on his knees in celebration in Barcelona.\n- Real Madrid 2-1 Barcelona: El Clásico score stats and ...: Oct 26, 2025 · Goals from Kylian Mbappe and Jude Bellingham gave Real Madrid a 2-1 win over Barcelona on Sunday, giving Xabi Alonso his first El Clasico win as head coach. Madrid c...\n\n\nFoydalanuvchi savoli: Who won the match between Barcelona and Real Madrid yesterday"
+      },
+      {
+        "role": "assistant",
+        "content": "I cannot determine which specific match you are referring to, as there is no context for the current date. However, based on the provided records, here are recent El Clásico results:\n\n*   **May 10, 2026**: Barcelona won 2-0.\n*   **October 25, 2026**: Real Madrid won 2-1.\n*   **October 26, 2025**: Real Madrid won 2-1.\n\nPlease clarify the specific date you are asking about."
+      }
+    ],
+    "qiziqishlar": []
+  },
+  "sana_test1": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [
+      {
+        "role": "user",
+        "content": "Bugungi sana: 2026-11-19 (Thursday).\nQuyidagi internetdan topilgan malumotlar asosida foydalanuvchi savoliga tabiiy, qisqa va aniq javob ber. Agar savolda \"kecha\", \"bugun\", \"yesterday\", \"today\" kabi nisbiy sana borsa, yuqoridagi bugungi sanaga nisbatan hisobla. Faqat kerakli malumotni ishlat, manba royxatini qaytarma.\n\n- Barcelona vs Real Madrid HIGHLIGHTS: BAR beat RMA 2-0 to lift ...: May 10, 2026 · In the final El Clasico of the 2025–26 season, Barcelona (BAR) beat Real Madrid (RMA) 2-0 at Camp Nou on Monday thanks to brilliant goals from Marcus Rashford and Fe...\n- Results - FC Barcelona Official website: Nov 8, 2026 · Barça first team results page for LaLiga, Champions League and Copa del Rey.\n- Barcelona 1 - 2 Real Madrid - Match Report & Highlights: Oct 25, 2026 · Kylian Mbappe's double took Real Madrid to a famous 2-1 Clasico win, which had Jose Mourinho sliding on his knees in celebration in Barcelona.\n- Real Madrid 2-1 Barcelona: El Clásico score stats and ...: Oct 26, 2025 · Goals from Kylian Mbappe and Jude Bellingham gave Real Madrid a 2-1 win over Barcelona on Sunday, giving Xabi Alonso his first El Clasico win as head coach. Madrid c...\n\n\nFoydalanuvchi savoli: Who won the match between Barcelona and Real Madrid yesterday"
+      },
+      {
+        "role": "assistant",
+        "content": "I don't have information about a match between Barcelona and Real Madrid that took place yesterday (November 18, 2026). The most recent El Clásico data available is from October 25, 2026, which Real Madrid won 2-1, and the final match of the 2025–26 season on May 10, 2026, which Barcelona won 2-0."
+      }
+    ],
+    "qiziqishlar": []
   }
 }

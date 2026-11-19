@@ -1,73 +1,20 @@
 import io
+from datetime import datetime
 
 with io.open("server.py", "r", encoding="utf-8") as f:
     content = f.read()
 
-boshi_marker = "def ob_havo_olish(shahar, til_kodi=None):"
-oxiri_marker = chr(10) + "def "
-boshi_idx = content.find(boshi_marker)
-qidirish_boshi = boshi_idx + len(boshi_marker)
-oxiri_idx = content.find(oxiri_marker, qidirish_boshi)
+eski = '''            kontekst_matn = "Quyidagi internetdan topilgan malumotlar asosida foydalanuvchi savoliga tabiiy, qisqa va aniq javob ber. Faqat kerakli malumotni ishlat, manba royxatini qaytarma." + chr(10) + chr(10) + qidiruv_natija + chr(10) + chr(10) + "Foydalanuvchi savoli: " + data.matn'''
 
-yangi = "def ob_havo_matn_tarjima_qil(matn_en, til_kodi):" + chr(10)
-yangi += "    try:" + chr(10)
-yangi += "        if not til_kodi or til_kodi.lower() in (\"en\", \"en-gb\", \"en-us\"):" + chr(10)
-yangi += "            return matn_en" + chr(10)
-yangi += "        import html, re" + chr(10)
-yangi += "        from deep_translator import MyMemoryTranslator" + chr(10)
-yangi += "        himoya_belgisi = \"XSOMX9Y\"" + chr(10)
-yangi += "        matn_himoyalangan = re.sub(r\"\\bsom\\b\", himoya_belgisi, matn_en, flags=re.IGNORECASE)" + chr(10)
-yangi += "        kod = mymemory_til_kodi_topish(til_kodi)" + chr(10)
-yangi += "        natija = MyMemoryTranslator(source=\"en-GB\", target=kod).translate(matn_himoyalangan)" + chr(10)
-yangi += "        if natija:" + chr(10)
-yangi += "            natija = html.unescape(natija)" + chr(10)
-yangi += "            natija = natija.replace(himoya_belgisi, \"som\").replace(himoya_belgisi.lower(), \"som\").replace(himoya_belgisi.capitalize(), \"Som\")" + chr(10)
-yangi += "        return natija if natija else matn_en" + chr(10)
-yangi += "    except Exception:" + chr(10)
-yangi += "        return matn_en" + chr(10)
-yangi += chr(10)
-yangi += "def ob_havo_olish(shahar, til_kodi=None):" + chr(10)
-yangi += "    try:" + chr(10)
-yangi += "        url = \"https://wttr.in/\" + shahar.replace(\" \", \"+\") + \"?format=j1\"" + chr(10)
-yangi += "        r = http_client.get(url, timeout=8)" + chr(10)
-yangi += "        if r.status_code == 200:" + chr(10)
-yangi += "            d = r.json()" + chr(10)
-yangi += "            cur = d[\"current_condition\"][0]" + chr(10)
-yangi += "            harorat = cur[\"temp_C\"]" + chr(10)
-yangi += "            his = cur[\"FeelsLikeC\"]" + chr(10)
-yangi += "            namlik = cur[\"humidity\"]" + chr(10)
-yangi += "            shamol = cur[\"windspeedKmph\"]" + chr(10)
-yangi += "            tavsif_en = cur[\"weatherDesc\"][0][\"value\"]" + chr(10)
-yangi += "            weather3 = d[\"weather\"]" + chr(10)
-yangi += "            kunlar_en = [\"Today\", \"Tomorrow\", \"Day after tomorrow\"]" + chr(10)
-yangi += "            qatorlar = []" + chr(10)
-yangi += "            qatorlar.append(shahar + \" weather:\")" + chr(10)
-yangi += "            qatorlar.append(\"Temperature: \" + harorat + \"C (feels like: \" + his + \"C)\")" + chr(10)
-yangi += "            qatorlar.append(\"Humidity: \" + namlik + \"%\")" + chr(10)
-yangi += "            qatorlar.append(\"Wind: \" + shamol + \" km/h\")" + chr(10)
-yangi += "            qatorlar.append(\"Condition: \" + tavsif_en)" + chr(10)
-yangi += "            qatorlar.append(\"3-day forecast:\")" + chr(10)
-yangi += "            for i, w in enumerate(weather3[:3]):" + chr(10)
-yangi += "                min_t = w[\"mintempC\"]" + chr(10)
-yangi += "                max_t = w[\"maxtempC\"]" + chr(10)
-yangi += "                tavsif3_en = w[\"hourly\"][4][\"weatherDesc\"][0][\"value\"]" + chr(10)
-yangi += "                qatorlar.append(kunlar_en[i] + \": \" + min_t + \"C ~ \" + max_t + \"C, \" + tavsif3_en)" + chr(10)
-yangi += "            matn_en = chr(10).join(qatorlar)" + chr(10)
-yangi += "            maqsad_til = til_kodi if til_kodi else \"uz\"" + chr(10)
-yangi += "            return ob_havo_matn_tarjima_qil(matn_en, maqsad_til)" + chr(10)
-yangi += "    except Exception as e:" + chr(10)
-yangi += "        print(\"Ob-havo xatosi:\", e)" + chr(10)
-yangi += "    try:" + chr(10)
-yangi += "        url = \"https://wttr.in/\" + shahar.replace(\" \", \"+\") + \"?format=3\"" + chr(10)
-yangi += "        r = http_client.get(url, timeout=5)" + chr(10)
-yangi += "        if r.status_code == 200:" + chr(10)
-yangi += "            return \"Ob-havo: \" + r.text" + chr(10)
-yangi += "    except:" + chr(10)
-yangi += "        pass" + chr(10)
-yangi += "    return \"\"" + chr(10)
+yangi = '''            from datetime import datetime
+            bugungi_sana = datetime.now().strftime("%Y-%m-%d (%A)")
+            kontekst_matn = "Bugungi sana: " + bugungi_sana + "." + chr(10) + "Quyidagi internetdan topilgan malumotlar asosida foydalanuvchi savoliga tabiiy, qisqa va aniq javob ber. Agar savolda \\"kecha\\", \\"bugun\\", \\"yesterday\\", \\"today\\" kabi nisbiy sana borsa, yuqoridagi bugungi sanaga nisbatan hisobla. Faqat kerakli malumotni ishlat, manba royxatini qaytarma." + chr(10) + chr(10) + qidiruv_natija + chr(10) + chr(10) + "Foydalanuvchi savoli: " + data.matn'''
 
-content = content[:boshi_idx] + yangi + content[oxiri_idx + 1:]
-
-with io.open("server.py", "w", encoding="utf-8") as f:
-    f.write(content)
-print("Tuzatildi!")
+if eski in content:
+    content = content.replace(eski, yangi)
+    with io.open("server.py", "w", encoding="utf-8") as f:
+        f.write(content)
+    print("Tuzatildi!")
+else:
+    print("Topilmadi")
+    
