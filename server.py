@@ -870,7 +870,7 @@ def rasm_yaratish(data: RasmModel):
     try:
         prompt = rasm_prompt_tayyorla(data.matn)
         prompt_full = prompt + ", ultra realistic, 4K, professional photography, detailed"
-        url = "https://image.pollinations.ai/prompt/" + prompt_full.replace(" ", "%20") + "?model=flux&width=1024&height=1024&nologo=true"
+        url = "https://image.pollinatiowi/prompt/" + prompt_full.replace(" ", "%20") + "?model=flux&width=1024&height=1024&nologo=true"
         return {"rasm_url": url}
     except Exception as e:
         return {"xato": str(e)}

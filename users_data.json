@@ -518,5 +518,20 @@
       }
     ],
     "qiziqishlar": []
+  },
+  "user_ao6dfxkdk": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [
+      {
+        "role": "user",
+        "content": "salom"
+      },
+      {
+        "role": "assistant",
+        "content": "Salom! Sizga qanday yordam bera olaman"
+      }
+    ],
+    "qiziqishlar": []
   }
 }
