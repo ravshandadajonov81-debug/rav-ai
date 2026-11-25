@@ -1,20 +1,26 @@
 import io
-from datetime import datetime
 
 with io.open("server.py", "r", encoding="utf-8") as f:
-    content = f.read()
+    kod = f.read()
 
-eski = '''            kontekst_matn = "Quyidagi internetdan topilgan malumotlar asosida foydalanuvchi savoliga tabiiy, qisqa va aniq javob ber. Faqat kerakli malumotni ishlat, manba royxatini qaytarma." + chr(10) + chr(10) + qidiruv_natija + chr(10) + chr(10) + "Foydalanuvchi savoli: " + data.matn'''
+marker_v3 = "# ===RAV_SCHEDULER_V3_MARKER==="
+scheduler_init_belgisi = "rav_scheduler = BackgroundScheduler()"
 
-yangi = '''            from datetime import datetime
-            bugungi_sana = datetime.now().strftime("%Y-%m-%d (%A)")
-            kontekst_matn = "Bugungi sana: " + bugungi_sana + "." + chr(10) + "Quyidagi internetdan topilgan malumotlar asosida foydalanuvchi savoliga tabiiy, qisqa va aniq javob ber. Agar savolda \\"kecha\\", \\"bugun\\", \\"yesterday\\", \\"today\\" kabi nisbiy sana borsa, yuqoridagi bugungi sanaga nisbatan hisobla. Faqat kerakli malumotni ishlat, manba royxatini qaytarma." + chr(10) + chr(10) + qidiruv_natija + chr(10) + chr(10) + "Foydalanuvchi savoli: " + data.matn'''
-
-if eski in content:
-    content = content.replace(eski, yangi)
-    with io.open("server.py", "w", encoding="utf-8") as f:
-        f.write(content)
-    print("Tuzatildi!")
+if scheduler_init_belgisi in kod:
+    print("rav_scheduler allaqachon yaratilgan, hech narsa o'zgarmadi")
+elif marker_v3 not in kod:
+    print("XATO: V3 marker topilmadi")
 else:
-    print("Topilmadi")
-    
+    qator = chr(10)
+    qoshiladigan = "from apscheduler.schedulers.background import BackgroundScheduler" + qator
+    qoshiladigan += "import datetime" + qator
+    qoshiladigan += "rav_scheduler = BackgroundScheduler()" + qator
+    qoshiladigan += "rav_scheduler.start()" + qator
+
+    kod = kod.replace(marker_v3, marker_v3 + qator + qoshiladigan, 1)
+
+    with io.open("server.py", "w", encoding="utf-8") as f:
+        f.write(kod)
+    print("rav_scheduler qayta yaratildi va ishga tushirildi!")
+
+print("Tuzatildi!")

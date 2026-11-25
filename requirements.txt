@@ -13,3 +13,4 @@ Babel
 deep-translator
 
 ddgs
+apscheduler

@@ -874,3 +874,38 @@ def rasm_yaratish(data: RasmModel):
         return {"rasm_url": url}
     except Exception as e:
         return {"xato": str(e)}
+
+# ===RAV_SCHEDULER_V3_MARKER===
+from apscheduler.schedulers.background import BackgroundScheduler
+import datetime
+rav_scheduler = BackgroundScheduler()
+rav_scheduler.start()
+
+import requests as rav_requests
+
+RAV_ADMIN_CHAT_ID = '7253108810'
+
+def rav_telegram_xabar_yubor(matn):
+    try:
+        token = os.getenv('TELEGRAM_TOKEN')
+        url = 'https://api.telegram.org/bot' + token + '/sendMessage'
+        rav_requests.post(url, json={'chat_id': RAV_ADMIN_CHAT_ID, 'text': matn})
+    except Exception as xato:
+        print('Telegram xabar yuborishda xato: ' + str(xato))
+
+def kunlik_xabar_yubor():
+    try:
+        ob_havo_matni = ob_havo_olish('Shirin')
+    except Exception as xato:
+        ob_havo_matni = 'Ob-havo olishda xato: ' + str(xato)
+    try:
+        yangiliklar_matni = internetdan_qidirish("bugungi asosiy dunyo va O'zbekiston yangiliklari")
+    except Exception as xato:
+        yangiliklar_matni = 'Yangiliklarni olishda xato: ' + str(xato)
+    toliq_xabar = 'RAV AI kunlik xabar' + chr(10) + chr(10)
+    toliq_xabar += 'OB-HAVO (Shirin, Sirdaryo):' + chr(10) + str(ob_havo_matni) + chr(10) + chr(10)
+    toliq_xabar += 'YANGILIKLAR:' + chr(10) + str(yangiliklar_matni)
+    rav_telegram_xabar_yubor(toliq_xabar)
+
+rav_scheduler.add_job(kunlik_xabar_yubor, 'cron', hour=10, minute=0, timezone='Asia/Tashkent')
+print('RAV kunlik xabar (10:00, Shirin + yangiliklar) rejalashtirildi')
