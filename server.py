@@ -893,19 +893,30 @@ def rav_telegram_xabar_yubor(matn):
     except Exception as xato:
         print('Telegram xabar yuborishda xato: ' + str(xato))
 
+# ===RAV_KUNLIK_XABAR_V2===
 def kunlik_xabar_yubor():
+    print('[KUNLIK XABAR] boshlandi')
     try:
         ob_havo_matni = ob_havo_olish('Shirin')
+        print('[KUNLIK XABAR] ob-havo natijasi uzunligi: ' + str(len(str(ob_havo_matni))))
+        print('[KUNLIK XABAR] ob-havo qiymati: ' + repr(ob_havo_matni))
+        if not ob_havo_matni:
+            ob_havo_matni = 'Ob-havo maʼlumoti boʼsh qaytdi (wttr.in javob bermadi)'
     except Exception as xato:
         ob_havo_matni = 'Ob-havo olishda xato: ' + str(xato)
+        print('[KUNLIK XABAR] OB-HAVO XATO: ' + str(xato))
     try:
         yangiliklar_matni = internetdan_qidirish("bugungi asosiy dunyo va O'zbekiston yangiliklari")
+        print('[KUNLIK XABAR] yangiliklar uzunligi: ' + str(len(str(yangiliklar_matni))))
     except Exception as xato:
         yangiliklar_matni = 'Yangiliklarni olishda xato: ' + str(xato)
+        print('[KUNLIK XABAR] YANGILIK XATO: ' + str(xato))
     toliq_xabar = 'RAV AI kunlik xabar' + chr(10) + chr(10)
     toliq_xabar += 'OB-HAVO (Shirin, Sirdaryo):' + chr(10) + str(ob_havo_matni) + chr(10) + chr(10)
     toliq_xabar += 'YANGILIKLAR:' + chr(10) + str(yangiliklar_matni)
+    print('[KUNLIK XABAR] Telegramga yuborilyapti...')
     rav_telegram_xabar_yubor(toliq_xabar)
+    print('[KUNLIK XABAR] tugadi')
 
 rav_scheduler.add_job(kunlik_xabar_yubor, 'cron', hour=10, minute=0, timezone='Asia/Tashkent')
 print('RAV kunlik xabar (10:00, Shirin + yangiliklar) rejalashtirildi')
