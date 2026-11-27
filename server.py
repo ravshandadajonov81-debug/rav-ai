@@ -819,7 +819,7 @@ SLENG_LUGAT = {
 from pymongo import MongoClient
 
 MONGO_URI = os.getenv("MONGO_URI")
-mongo_client = MongoClient(MONGO_URI)
+mongo_client = MongoClient(MONGO_URI, tls=True, tlsAllowInvalidCertificates=True)
 rav_db = mongo_client["rav_ai_db"]
 foydalanuvchilar = rav_db["foydalanuvchilar"]
 

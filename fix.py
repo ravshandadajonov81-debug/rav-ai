@@ -1,21 +1,13 @@
-toliq_royxat = """fastapi
-uvicorn
-groq
-python-dotenv
-httpx
-duckduckgo-search
-tzdata
-geopy
-timezonefinder
-Babel
-deep-translator
-ddgs
-apscheduler
-pymongo
-"""
+with open('server.py', 'r', encoding='utf-8') as f:
+    kod = f.read()
 
-with open('requirements.txt', 'w', encoding='utf-8') as f:
-    f.write(toliq_royxat)
+eski = 'mongo_client = MongoClient(MONGO_URI)'
+yangi = 'mongo_client = MongoClient(MONGO_URI, tls=True, tlsAllowInvalidCertificates=True)'
 
-print("requirements.txt tozalab qayta yozildi!")
-print(toliq_royxat)
+if eski in kod:
+    kod = kod.replace(eski, yangi)
+    with open('server.py', 'w', encoding='utf-8') as f:
+        f.write(kod)
+    print("TLS sozlamasi qoshildi!")
+else:
+    print("DIQQAT: topilmadi.")
