@@ -793,8 +793,34 @@ def javobni_tarjima_qil(javob_matni, asl_savol):
         time.sleep(1)
     return javob_matni
 
+SLENG_LUGAT = {
+    "zo'r-ku": "juda yaxshi ekan",
+    "zo'rku": "juda yaxshi ekan",
+    "qoyil": "ajoyib",
+    "qoyilmaqom": "juda ajoyib",
+    "padavlat": "boy odam",
+    "voy-buy": "voy, hayron qoldim",
+    "voy buy": "voy, hayron qoldim",
+    "lom-mim": "hech narsa",
+    "lom mim": "hech narsa",
+    "kaltafahm": "tushunmovchan",
+    "jajji": "kichkina",
+    "chakki emas": "yomon emas",
+    "pachava": "juda yomon",
+}
+
+def sleng_tozala(matn):
+    import re
+    natija = matn
+    for sleng, adabiy in SLENG_LUGAT.items():
+        andoza = re.compile(re.escape(sleng), re.IGNORECASE)
+        natija = andoza.sub(adabiy, natija)
+    return natija
+
+
 @app.post("/savol")
 def savol_yuborish(data: SavolModel):
+    data.matn = sleng_tozala(data.matn)
     if kerak_mi_yangilik(data.matn):
         mavzu = yangilik_mavzusi(data.matn)
         yangiliklar = yangiliklar_olish(mavzu)

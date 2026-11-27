@@ -16,6 +16,14 @@
       {
         "role": "assistant",
         "content": "Salom! Sizga qanday yordam bera olaman?"
+      },
+      {
+        "role": "user",
+        "content": "bu kino juda yaxshi ekan, ajoyib! inglizchada qanday boladi buni ayt"
+      },
+      {
+        "role": "assistant",
+        "content": "\"Bu kino juda yaxshi ekan, ajoyib!\" degan ibora ingliz tiliga quyidagicha tarjima qilinadi:\n\n**\"This movie is great, amazing!\"**\n\nYoki biroz tabiiyroq so'zlashuv uslubida:\n**\"This movie is really good, awesome!\"**"
       }
     ],
     "qiziqishlar": []

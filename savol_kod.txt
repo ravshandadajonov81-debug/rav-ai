@@ -1,0 +1,71 @@
+@app.post("/savol")
+def savol_yuborish(data: SavolModel):
+    if kerak_mi_yangilik(data.matn):
+        mavzu = yangilik_mavzusi(data.matn)
+        yangiliklar = yangiliklar_olish(mavzu)
+        if yangiliklar:
+            javob = "So'nggi yangiliklar:\n" + "\n".join([f"{i+1}. {y}" for i, y in enumerate(yangiliklar)])
+            return {"javob": javob}
+    kalit_ob = [
+        "ob-havo", "ob havo", "havo", "weather", "harorat", "iqlim", "temps", "wetter",
+        "clima", "tempo", "погода", "havo-iqlim", "天气", "mausam", "thoi tiet",
+        "الطقس", "طقس", "درجة الحرارة",
+        "hava durumu", "sicaklik",
+        "temperature", "forecast",
+        "pogoda", "pogoda dzis",
+        "havo", "obhavo",
+        "sydd", "veder",
+        "weer", "vreme", "vrijeme", "sää", "veir", "vejr", "vader",
+        "tiempo", "que tiempo hace",
+        "날씨",
+        "thoi tiet hom nay",
+        "ilm", "eira",
+        "moyin havo", "havo rayi",
+    ]
+    if any(s in data.matn.lower() for s in kalit_ob):
+        shahar_ob = None
+        for urinish_ob in range(4):
+            shahar_ob = joy_nomini_ai_topish(data.matn)
+            if shahar_ob:
+                break
+            time.sleep(1)
+        if not shahar_ob:
+            shahar_ob = shahar_topish(data.matn)
+        til_ob = tilni_ai_aniqlash(data.matn)
+        ob = ob_havo_olish(shahar_ob, til_ob)
+        if ob:
+            return {"javob": ob}
+    if kerak_mi_valyuta(data.matn):
+        kod = valyuta_kodi_topish(data.matn)
+        miqdor = miqdor_topish(data.matn)
+        natija = valyuta_kursi_olish(kod, miqdor)
+        til_val = tilni_ai_aniqlash(data.matn)
+        tarjima_val = deep_tarjima_qil(natija, til_val)
+        if tarjima_val:
+            return {"javob": tarjima_val}
+        return {"javob": javobni_tarjima_qil(natija, data.matn)}
+    if kerak_mi_vaqt(data.matn) or kerak_mi_vaqt_ai(data.matn):
+        til = tilni_ai_aniqlash(data.matn)
+        shahar = None
+        for urinish3 in range(6):
+            shahar = joy_nomini_ai_topish(data.matn)
+            if shahar:
+                break
+            time.sleep(1)
+        if not shahar:
+            return {"javob": javobni_tarjima_qil("Iltimos shahar nomini aniqroq korsating.", data.matn)}
+        natija = babel_bilan_vaqt_olish(shahar, til)
+        if natija:
+            return {"javob": natija}
+        eski_natija = dunyo_vaqti_olish(data.matn)
+        return {"javob": javobni_tarjima_qil(eski_natija, data.matn)}
+    if kerak_mi_internet_ai(data.matn):
+        qidiruv_natija = internetdan_qidirish(data.matn)
+        if qidiruv_natija:
+            from datetime import datetime
+            bugungi_sana = datetime.now().strftime("%Y-%m-%d (%A)")
+            kontekst_matn = "Bugungi sana: " + bugungi_sana + "." + chr(10) + "Quyidagi internetdan topilgan malumotlar asosida foydalanuvchi savoliga tabiiy, qisqa va aniq javob ber. Agar savolda \"kecha\", \"bugun\", \"yesterday\", \"today\" kabi nisbiy sana borsa, yuqoridagi bugungi sanaga nisbatan hisobla. Faqat kerakli malumotni ishlat, manba royxatini qaytarma." + chr(10) + chr(10) + qidiruv_natija + chr(10) + chr(10) + "Foydalanuvchi savoli: " + data.matn
+            javob_internet = gemini_javob(kontekst_matn, data.session_id)
+            return {"javob": javob_internet}
+    javob = gemini_javob(data.matn, data.session_id)
+    return {"javob": javob}
