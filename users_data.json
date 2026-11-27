@@ -541,5 +541,20 @@
       }
     ],
     "qiziqishlar": []
+  },
+  "telegram_999999": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [
+      {
+        "role": "user",
+        "content": "bu kino juda yaxshi ekan, ajoyib!"
+      },
+      {
+        "role": "assistant",
+        "content": "Rahmat! Meni maqtaganingiz uchun minnatdorman. 😊\n\nShu kabi kashfiyotlar yoki qiziqarli mavzular bo‘yicha yordam kerak bo‘lsa, yoki shunchaki muloqot qilsangiz, doim tayyorman.\n\nKechiravering, lekin hozircha sizning ismingizni bilmayapman. Sizni qanday qo‘llopib, o‘zingni yoqtirishimni xohlaysiz?"
+      }
+    ],
+    "qiziqishlar": []
   }
 }

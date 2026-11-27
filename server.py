@@ -123,6 +123,12 @@ def telegram_xabar_qayta_ishlash(update):
         chat_id = message.get("chat", {}).get("id")
         matn = message.get("text", "")
         if chat_id and matn:
+            matn = sleng_tozala(matn)
+            message["text"] = matn
+            try:
+                foydalanuvchini_saqla(chat_id)
+            except Exception as mongo_xato:
+                print("Mongo saqlash xatosi:", mongo_xato)
             session_id = f"telegram_{chat_id}"
             if matn == "/start":
                 telegram_yuborish(chat_id, "Salom! Men RAV AI!\nIsmingizni ayting!/yangiliklar - so'nggi xabarlar")
@@ -808,6 +814,51 @@ SLENG_LUGAT = {
     "chakki emas": "yomon emas",
     "pachava": "juda yomon",
 }
+
+
+from pymongo import MongoClient
+
+MONGO_URI = os.getenv("MONGO_URI")
+mongo_client = MongoClient(MONGO_URI)
+rav_db = mongo_client["rav_ai_db"]
+foydalanuvchilar = rav_db["foydalanuvchilar"]
+
+
+def foydalanuvchini_saqla(chat_id, ism=None, shahar=None, mavzu=None):
+    chat_id = str(chat_id)
+    mavjud = foydalanuvchilar.find_one({"chat_id": chat_id})
+    if not mavjud:
+        yangi = {"chat_id": chat_id, "ism": ism, "shaharlar": {}, "mavzular": {}}
+        foydalanuvchilar.insert_one(yangi)
+        mavjud = yangi
+    yangilash = {}
+    if ism:
+        yangilash["ism"] = ism
+    if shahar:
+        shaharlar = mavjud.get("shaharlar", {})
+        shaharlar[shahar] = shaharlar.get(shahar, 0) + 1
+        yangilash["shaharlar"] = shaharlar
+    if mavzu:
+        mavzular = mavjud.get("mavzular", {})
+        mavzular[mavzu] = mavzular.get(mavzu, 0) + 1
+        yangilash["mavzular"] = mavzular
+    if yangilash:
+        foydalanuvchilar.update_one({"chat_id": chat_id}, {"$set": yangilash})
+
+
+def foydalanuvchini_olish(chat_id):
+    chat_id = str(chat_id)
+    return foydalanuvchilar.find_one({"chat_id": chat_id})
+
+
+def sevimli_shahar_olish(chat_id):
+    foydalanuvchi = foydalanuvchini_olish(chat_id)
+    if not foydalanuvchi:
+        return None
+    shaharlar = foydalanuvchi.get("shaharlar", {})
+    if not shaharlar:
+        return None
+    return max(shaharlar, key=shaharlar.get)
 
 def sleng_tozala(matn):
     import re
