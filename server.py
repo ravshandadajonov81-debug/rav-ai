@@ -114,7 +114,7 @@ def telegram_xabar_qayta_ishlash(update):
     try:
         message = update.get("message", {})
         chat_type = message.get("chat", {}).get("type", "private")
-        bot_username = "ravo7_ai_bot"
+        bot_username = "ravo8_ai_bot"
         if chat_type in ["group", "supergroup"]:
             matn_raw = message.get("text", "")
             if ("@" + bot_username) not in matn_raw and not matn_raw.startswith("/"):
