@@ -571,5 +571,36 @@
       }
     ],
     "qiziqishlar": []
+  },
+  "telegram_777777": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [
+      {
+        "role": "user",
+        "content": "Samarqandda ob-havo qanday?"
+      },
+      {
+        "role": "assistant",
+        "content": "Samarqandda hozir ob-havo quyidagicha: ☀️ Quyoshli, harorat **+13°C**."
+      },
+      {
+        "role": "user",
+        "content": "Samarqandda ob-havo qanday?"
+      },
+      {
+        "role": "assistant",
+        "content": "Samarqandda hozirgi holat: ☀️ Quyoshli, harorat **+13°C**."
+      },
+      {
+        "role": "user",
+        "content": "Samarqandda ob-havo qanday?"
+      },
+      {
+        "role": "assistant",
+        "content": "Samarqandda ob-havo o'zgarmas: ☀️ Quyoshli, harorat **+13°C**."
+      }
+    ],
+    "qiziqishlar": []
   }
 }

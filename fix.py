@@ -1,40 +1,52 @@
-with open('server.py', 'r', encoding='utf-8') as f:
+import re
+
+with open("server.py", "r", encoding="utf-8") as f:
     kod = f.read()
 
-eski = '''            try:
-                foydalanuvchini_saqla(chat_id)
-            except Exception as mongo_xato:
-                print("Mongo saqlash xatosi:", mongo_xato)'''
+eski_blok = '''            else:
+                javob = gemini_javob(matn, session_id)
+                telegram_yuborish(chat_id, javob)'''
 
-yangi = '''            try:
-                aniq_shahar = None
-                try:
-                    aniq_shahar = joy_nomini_ai_topish(matn)
-                except Exception:
-                    aniq_shahar = None
-                aniq_mavzu = "umumiy"
-                matn_kichik = matn.lower()
-                if any(s in matn_kichik for s in ["ob-havo", "ob havo", "havo", "weather", "harorat"]):
-                    aniq_mavzu = "ob-havo"
-                elif any(s in matn_kichik for s in ["valyuta", "kurs", "dollar", "som", "rubl"]):
-                    aniq_mavzu = "valyuta"
-                elif any(s in matn_kichik for s in ["vaqt", "soat", "time"]):
-                    aniq_mavzu = "vaqt"
-                aniq_ism = None
-                if "ismim" in matn_kichik:
-                    soz_royxati = matn.split()
-                    for i2, s2 in enumerate(soz_royxati):
-                        if s2.lower().startswith("ismim") and i2 + 1 < len(soz_royxati):
-                            aniq_ism = soz_royxati[i2 + 1].strip(".,!")
-                            break
-                foydalanuvchini_saqla(chat_id, ism=aniq_ism, shahar=aniq_shahar, mavzu=aniq_mavzu)
-            except Exception as mongo_xato:
-                print("Mongo saqlash xatosi:", mongo_xato)'''
+yangi_blok = '''            else:
+                if aniq_mavzu == "ob-havo" and not aniq_shahar:
+                    try:
+                        sevimli = sevimli_shahar_olish(chat_id)
+                        if sevimli:
+                            matn = matn.strip()
+                            if matn.endswith("?"):
+                                matn = matn[:-1].strip()
+                            matn = f"{sevimli}da {matn}?"
+                    except Exception as sevimli_xato:
+                        print("Sevimli shahar olish xatosi:", sevimli_xato)
+                javob = gemini_javob(matn, session_id)
+                telegram_yuborish(chat_id, javob)'''
 
-if eski in kod:
-    kod = kod.replace(eski, yangi)
-    with open('server.py', 'w', encoding='utf-8') as f:
-        f.write(kod)
-    print("Avtomatik aniqlash qoshildi!")
+if eski_blok not in kod:
+    print("mos topilmadi")
 else:
-    print("DIQQAT: topilmadi.")
+    kod = kod.replace(eski_blok, yangi_blok)
+
+    funksiya_qoshish_nuqtasi = "def foydalanuvchini_olish(chat_id):"
+    yangi_funksiya = '''def sevimli_shahar_olish(chat_id):
+    try:
+        foydalanuvchi = foydalanuvchini_olish(chat_id)
+        if not foydalanuvchi:
+            return None
+        shaharlar = foydalanuvchi.get("shaharlar", {})
+        if not shaharlar:
+            return None
+        eng_kop_shahar = max(shaharlar, key=shaharlar.get)
+        return eng_kop_shahar
+    except Exception:
+        return None
+
+
+def foydalanuvchini_olish(chat_id):'''
+
+    if funksiya_qoshish_nuqtasi not in kod:
+        print("funksiya nuqtasi topilmadi")
+    else:
+        kod = kod.replace(funksiya_qoshish_nuqtasi, yangi_funksiya, 1)
+        with open("server.py", "w", encoding="utf-8") as f:
+            f.write(kod)
+        print("Sevimli shahar funksiyasi qoshildi!")
