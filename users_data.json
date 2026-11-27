@@ -556,5 +556,20 @@
       }
     ],
     "qiziqishlar": []
+  },
+  "telegram_888888": {
+    "ism": "",
+    "til": "uz",
+    "suhbat": [
+      {
+        "role": "user",
+        "content": "Toshkentda ob-havo qanday?"
+      },
+      {
+        "role": "assistant",
+        "content": "Assalomu alaykum, Ramil!\n\nHozirda Toshkentda ob-havo quyidagicha:\n🌦️ **Agar yomg'ir yog'sa**\n🌡️ Harorat: **+11°C**\n\nShunchaki issiq emas, shuning uchun uydan chiqayotganda issiq ko'ylak yoki pardalashkin kiyishingizni tavsiya qilaman."
+      }
+    ],
+    "qiziqishlar": []
   }
 }
