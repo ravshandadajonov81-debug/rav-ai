@@ -897,7 +897,7 @@ def rav_telegram_xabar_yubor(matn):
 def kunlik_xabar_yubor():
     print('[KUNLIK XABAR] boshlandi')
     try:
-        ob_havo_matni = ob_havo_olish('Shirin')
+        ob_havo_matni = ob_havo_olish('Shirin', 'uz')
         print('[KUNLIK XABAR] ob-havo natijasi uzunligi: ' + str(len(str(ob_havo_matni))))
         print('[KUNLIK XABAR] ob-havo qiymati: ' + repr(ob_havo_matni))
         if not ob_havo_matni:
@@ -906,7 +906,7 @@ def kunlik_xabar_yubor():
         ob_havo_matni = 'Ob-havo olishda xato: ' + str(xato)
         print('[KUNLIK XABAR] OB-HAVO XATO: ' + str(xato))
     try:
-        yangiliklar_matni = internetdan_qidirish("bugungi asosiy dunyo va O'zbekiston yangiliklari")
+        yangiliklar_matni = internetdan_qidirish("2026-yil bugungi eng so'nggi dunyo va O'zbekiston yangiliklari")
         print('[KUNLIK XABAR] yangiliklar uzunligi: ' + str(len(str(yangiliklar_matni))))
     except Exception as xato:
         yangiliklar_matni = 'Yangiliklarni olishda xato: ' + str(xato)
